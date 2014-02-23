@@ -143,7 +143,7 @@ in read events.
 
 In the above example, this also means that the program automatically exits after
 the first line has been read. The reason for this is that the run() method of 
-the React::Loop and React::MainLoop classes automatically stop running when 
+the React::Loop and React::MainLoop classes automatically stops running when 
 there are no more callback functions active. By calling the Reader::cancel()
 method, the last and only registered callback function is cancelled, and the
 event loop has nothing left to monitor.
@@ -185,10 +185,11 @@ inside your callback function.
 
 With this knowledge we are going to modify our earlier example. The echo 
 application that we showed before is updated to set the timer back to five
-seconds every time that some input is read, so that the application will now
-only stop after no input was detected for five seconds. We also change the
-signal watcher: the moment CTRL+C is pressed, the application will stop 
-responding, but it will only exit one second later.
+seconds every time that some input is read, so that the application will no
+longer stop five seconds after it was started, but five seconds after the last
+input was received. We also change the signal watcher: the moment CTRL+C is 
+pressed, the application will stop responding, but it will delay it's exit 
+for one second.
 
 ````c++
 #include <reactcpp.h>
@@ -320,7 +321,8 @@ std::shared_ptr<Writer> Loop::onWritable(int fd, const WriteCallback &callback);
 
 Two possible callback signatures are accepted, one that takes a pointer to a
 watcher object (React::Reader* for the callback to onReadable(), and 
-React::Writer* for the callback to onWritable()):
+React::Writer* for the callback to onWritable()), and a callback that does not
+accept parameters at all.
 
 ````c++
 loop.onReadable(fd, [](Reader *reader) { ... });
@@ -351,13 +353,18 @@ well as the interval between all subsequent calls. If you ommit the initial time
 the callback will be first called after the first interval has passed.
 
 ````c++
-std::shared_ptr<Timer> Loop::onTimeout(Timestamp seconds, const TimerCallback &callback);
-std::shared_ptr<Interval> Loop::onInterval(Timestamp interval, const IntervalCallback &callback);
-std::shared_ptr<Interval> Loop::onInterval(Timestamp initial, Timestamp interval, const IntervalCallback &callback);
+std::shared_ptr<Timer> 
+Loop::onTimeout(Timestamp seconds, const TimerCallback &callback);
+
+std::shared_ptr<Interval> 
+Loop::onInterval(Timestamp interval, const IntervalCallback &callback);
+
+std::shared_ptr<Interval> 
+Loop::onInterval(Timestamp initial, Timestamp interval, const IntervalCallback &callback);
 ````
 
-Just like all other callbacks, the timer and interval callbacks also come in
-two forms: with and without a parameter.
+Just like the callbacks for filedescriptors, the callbacks for timers and intervals 
+also come in two forms: with and without a parameter.
 
 ````c++
 loop.onTimeout(3.0, [](Timer *timer) { ... });
@@ -374,9 +381,46 @@ directly:
 ````c++
 Timer timer(&loop, 3.0, [](Timer *timer) { ... });
 Timer timer(&loop, 3.0, []() { ... });
-Interval(&loop, 5.0, [](Interval *interval) { ... });
-Interval(&loop, 5.0, []() { ... });
-Interval(&loop, 2.0, 5.0, [](Interval *interval) { ... });
-Interval(&loop, 2.0, 5.0, []() { ... });
+Interval interval(&loop, 5.0, [](Interval *interval) { ... });
+Interval interval(&loop, 5.0, []() { ... });
+Interval interval(&loop, 2.0, 5.0, [](Interval *interval) { ... });
+Interval interval(&loop, 2.0, 5.0, []() { ... });
 ````
+
+SIGNALS
+=======
+
+Signals can be watched too. Normally, signals are delivered to your application
+in an asynchronous way, and the signal handling code could be started when your
+application is in the middle of running some other algorithm. By registering a 
+signal handler via the React::MainLoop class, you can prevent this, and have 
+your signal handling be executed as part of the event loop.
+
+Setting up a signal handler is just as easy as setting up callback functions
+for filedescriptors or timers. The loop object has a simple onSignal() method
+for it:
+
+````c++
+std::shared_ptr<Signal> 
+Loop::onSignal(int signum, const SignalCallback &callback);
+````
+
+And the callback function comes (of course) in two versions:
+
+````c++
+loop.onSignal(SIGTERM, [](Signal *signal) { ... });
+loop.onSignal(SIGTERM, []() { ... });
+````
+
+And for signals it is of course also possible to bypass the methods on the 
+loop class, and create a React::Signal object yourself:
+
+````c++
+Signal signal(&loop, SIGTERM, [](Signal *signal) { ... });
+SIgnal signal(&loop, SIGTERM, []() { ... });
+````
+
+
+THREAD SYNCHRONIZATION
+======================
 
