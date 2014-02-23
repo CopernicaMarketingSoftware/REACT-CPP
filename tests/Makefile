@@ -1,7 +1,7 @@
 CPP			    = g++
 RM			    = rm -f
 CPPFLAGS		= -Wall -I. -O2 -std=c++11 -g
-LDFLAGS			= -lreactcpp -lev
+LDFLAGS			= -pthread -lreactcpp -lev -Wl,--no-as-needed
 SOURCES			= $(wildcard *.cpp)
 TARGETS			= $(SOURCES:%.cpp=%)
 

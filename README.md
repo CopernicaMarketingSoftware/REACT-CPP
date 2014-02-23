@@ -282,7 +282,7 @@ int main()
     React::MainLoop loop;
 
     // we'd like to be notified when input is available on stdin
-    React::Reader reader(loop, STDIN_FILENO, [timer]() {
+    React::Reader reader(loop, STDIN_FILENO, []() {
     
         // read input
         std::string buffer;
@@ -401,8 +401,7 @@ for filedescriptors or timers. The loop object has a simple onSignal() method
 for it:
 
 ````c++
-std::shared_ptr<Signal> 
-Loop::onSignal(int signum, const SignalCallback &callback);
+std::shared_ptr<Signal> Loop::onSignal(int signum, const SignalCallback &callback);
 ````
 
 And the callback function comes (of course) in two versions:
@@ -423,4 +422,93 @@ SIgnal signal(&loop, SIGTERM, []() { ... });
 
 THREAD SYNCHRONIZATION
 ======================
+
+Let's introduce a new topic that has not been addressed in one of the
+examples: running multiple threads and optionally multiple thread loops.
+
+If your application runs multiple threads, there is a pretty good chance
+that sooner or later you want to get these threads in sync. When you have, for
+example, a worker thread that wants to report its results back to the
+main event loop, it should somehow notify the main thread that the result of the
+calculatations are somewhere to be picked up. This can be done with the
+Loop::onSynchronize() method.
+
+````c++
+#include <reactcpp.h>
+#include <unistd.h>
+#include <iostream>
+#include <thread>
+
+/**
+ *  Main procedure
+ */
+int main()
+{
+    // create a thread loop
+    React::MainLoop loop;
+    
+    // install an onSynchronize callback that is called when a worker thread
+    // is ready with its task, the returned synchronizer object is of type
+    // std::shared_ptr<Synchronizer>, and contains a thread safe pointer that
+    // can be access from the other thread to notify us
+    auto synchronizer = loop.onSynchronize([]() {
+        std::cout << "other thread has finished running" << std::endl;
+    });
+    
+    // start a new thread
+    std::thread thread([synchronizer]() {
+    
+        // some long running algorithm
+        sleep(1);
+        
+        // notify the main event loop that the task was completed
+        synchronizer->synchronize();
+    });
+    
+    // we'd like to be notified when input is available on stdin
+    loop.onReadable(STDIN_FILENO, []() {
+    
+        // read input
+        std::string buffer;
+        std::cin >> buffer;
+    
+        // show what we read
+        std::cout << buffer << std::endl;
+    });
+
+    // run the event loop
+    loop.run();
+    
+    // join the thread
+    thread.join();
+    
+    // done
+    return 0;
+}
+````
+
+The example above demonstrates how threads can synchronize with each other.
+First, you must create an endpoint that the other thread can use to call the
+main thread, and you must install a handler that will be called whenever the
+other thread uses that endpoint. Both steps can be taken by just calling
+Loop::onSynchronize() to install the handler. The endpoint object is returned
+by that method.
+
+After you've received the endpoint, you can pass it to the other thread so that
+it can call it.
+
+The Synchronizer is similar to classes like React::Reader, React::Writer, 
+React::Timer, etcetera. And the callback also comes in two forms: one with
+a parameter and one without, and the synchronizer can be registered via a call
+to Loop::onSynchronize() and by creating a Synchroninzer object directly:
+
+````c++
+std::shared_ptr<Synchronizer> Loop::onSynchronize(const SynchronizeCallback &callback);
+
+loop.onSynchronize([](Synchronizer *synchronizer) { ... });
+loop.onSynchronize([]() { ... });
+
+Synchronizer synchronizer(loop, [](Synchronizer &synchronizer) { ... });
+Synchronizer synchronizer(loop, []() { ... });
+````
 
