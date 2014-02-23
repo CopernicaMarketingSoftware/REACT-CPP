@@ -261,11 +261,10 @@ CONSTRUCT WATCHER OBJECTS
 
 Up to now we have registered callback methods via the Loop::onSomething()
 methods. These methods return a shared pointer to an object that keeps the
-watcher state.
-
-It is however also possible to create such objects directly, without having
-to call the Loop::onSomething methods(). This can be very convenient, because
-you can then unregister your callbacks by just destructing these objects.
+watcher state. It is also possible to create such objects directly, without 
+calling a Loop::onSomething method(). This can be very convenient, because
+you will have ownership of the object (instead of the event loop) and you can 
+unregister your handler function by just destructing the object.
 
 ````c++
 #include <reactcpp.h>
@@ -304,11 +303,80 @@ Conceptually, there is not a big difference between calling Loop::onReadable()
 to register a callback function, or by instantiating a React::Reader object
 yourself. In my opinition, the code that utilizes a call to Loop::onReadable() 
 is easier to understand and maintain, but by creating a Reader class yourself,
-you have full ownership of the class and can destruct it whenever you like.
+you have full ownership of the class and can destruct it whenever you like -
+which can be useful too.
 
 
-CHECKING FOR READABILITY
-========================
+FILEDESCRIPTORS
+===============
 
+Filedescriptors can be checked for activity by registering callbacks for 
+readability and writability. The loop object has two methods for that:
 
+````c++
+std::shared_ptr<Reader> Loop::onReadable(int fd, const ReadCallback &callback);
+std::shared_ptr<Writer> Loop::onWritable(int fd, const WriteCallback &callback);
+````
+
+Two possible callback signatures are accepted, one that takes a pointer to a
+watcher object (React::Reader* for the callback to onReadable(), and 
+React::Writer* for the callback to onWritable()):
+
+````c++
+loop.onReadable(fd, [](Reader *reader) { ... });
+loop.onReadable(fd, []() { ... });
+loop.onWritable(fd, [](Writer *writer) { ... });
+loop.onWritable(fd, []() { ... });
+````
+
+You can also create a Reader or Writer object yourself. In that case you will
+not have to use the Loop::onReadable() or Loop::onWritable() methods:
+
+````c++
+Reader reader(&loop, fd, [](Reader *reader) { ... });
+Reader reader(&loop, fd, []() { ... });
+Writer writer(&loop, fd, [](Writer *writer) { ... });
+Writer writer(&loop, fd, []() { ... });
+````
+
+TIMERS AND INTERVALS
+====================
+
+The React library supports both intervals and timers. A timer is triggered
+only once, an interval on the other hand calls the registered callback method 
+every time the interval time has expired.
+
+When you create an interval, you can specify both the initial expire time as
+well as the interval between all subsequent calls. If you ommit the initial time,
+the callback will be first called after the first interval has passed.
+
+````c++
+std::shared_ptr<Timer> Loop::onTimeout(Timestamp seconds, const TimerCallback &callback);
+std::shared_ptr<Interval> Loop::onInterval(Timestamp interval, const IntervalCallback &callback);
+std::shared_ptr<Interval> Loop::onInterval(Timestamp initial, Timestamp interval, const IntervalCallback &callback);
+````
+
+Just like all other callbacks, the timer and interval callbacks also come in
+two forms: with and without a parameter.
+
+````c++
+loop.onTimeout(3.0, [](Timer *timer) { ... });
+loop.onTimeout(3.0, []() { ... });
+loop.onInterval(5.0, [](Interval *interval) { ... });
+loop.onInterval(5.0, []() { ... });
+loop.onInterval(0.0, 5.0, [](Interval *interval) { ... });
+loop.onInterval(0.0, 5.0, []() { ... });
+````
+
+And you can of course also instantiate React::Timer and React::Interval objects
+directly:
+
+````c++
+Timer timer(&loop, 3.0, [](Timer *timer) { ... });
+Timer timer(&loop, 3.0, []() { ... });
+Interval(&loop, 5.0, [](Interval *interval) { ... });
+Interval(&loop, 5.0, []() { ... });
+Interval(&loop, 2.0, 5.0, [](Interval *interval) { ... });
+Interval(&loop, 2.0, 5.0, []() { ... });
+````
 
