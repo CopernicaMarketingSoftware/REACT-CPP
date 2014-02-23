@@ -170,21 +170,25 @@ RETURN VALUE OF LOOP METHODS
 
 The objects that are passed to the callback functions (React::Reader, 
 React::writer, etc) are also returned from the event-registering functions.
-Therefore, if you call Loop::onReadable() to register a function that should be
-called when a filedescriptor becomes readable, the Loop::onReadable() method
-immediately returns a reference to the React::Reader object that takes care
-of
+This means that it is possible to store the return value of a call to 
+Loop::onReadable() in a variable, so that you will not have to wait for the
+callback to be called to cancel further calls to it.
 
+All Loop::onSomething() methods have such a return value, and they all return 
+a shared_ptr to the watcher object. You may store this shared_ptr if you'd
+like to use it in the future, but you do not have to. Internally, the library
+also keeps a pointer to the object, and will pass on that pointer to your callback 
+every time it is called. So even if you decide to discard the return value, the 
+object will live on. The only way to stop the callback from being active is by 
+calling the cancel() method on the returned object, or on the same object
+inside your callback function.
 
-Although we have up to now ignored the return value of the various 
-Loop::onSomething() methods, it can be very convenient to 
-
-All Loop::onSomething() methods have a return value: the methods return a 
-std::shared_ptr to the objects that are also passed to the callback
-functions. We can use this to modify the first example. In that first example 
-we set a timer to exit the program after five seconds. Now we are going to 
-reset that timer every time that some input is detected. Only when no input
-was received for a full five seconds, the program will terminate.
+With this knowledge we are going to modify our earlier example. The echo 
+application that we showed before is updated to set the timer back to five
+seconds every time that some input is read, so that the application will now
+only stop after no input was detected for five seconds. We also change the
+signal watcher: the moment CTRL+C is pressed, the application will stop 
+responding, but it will only exit one second later.
 
 ````c++
 #include <reactcpp.h>
