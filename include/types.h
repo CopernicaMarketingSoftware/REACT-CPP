@@ -19,6 +19,7 @@ class Writer;
 class Timer;
 class Interval;
 class Synchronizer;
+class Signal;
 
 /**
  *  Timestamp type is a wrapper around libev
@@ -30,6 +31,7 @@ using WriteCallback = std::function<void(Writer *)>;
 using TimerCallback = std::function<void(Timer *)>;
 using IntervalCallback = std::function<void(Interval *)>;
 using SynchronizeCallback = std::function<void(Synchronizer *)>;
+using SignalCallback = std::function<void(Signal *)>;
 
 /**
  *  End namespace

@@ -19,6 +19,13 @@
  */
 #include <reactcpp/types.h>
 #include <reactcpp/loop.h>
+#include <reactcpp/mainloop.h>
+#include <reactcpp/reader.h>
+#include <reactcpp/writer.h>
+#include <reactcpp/signal.h>
+#include <reactcpp/synchronizer.h>
+#include <reactcpp/timer.h>
+#include <reactcpp/interval.h>
 
 /**
  *  End if
