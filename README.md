@@ -171,12 +171,12 @@ RETURN VALUE OF LOOP METHODS
 The objects that are passed to the callback functions (React::Reader, 
 React::writer, etc) are also returned from the event-registering functions.
 This means that it is possible to store the return value of a call to 
-Loop::onReadable() in a variable, so that you will not have to wait for the
+Loop::onReadable() in a variable, and that you will not have to wait for the
 callback to be called to cancel further calls to it.
 
-All Loop::onSomething() methods have such a return value, and they all return 
-a shared_ptr to the watcher object. You may store this shared_ptr if you'd
-like to use it in the future, but you do not have to. Internally, the library
+All Loop::onSomething() methods return a shared_ptr to the watcher object. 
+You may store this shared_ptr if you'd like to use it in the future, but you do 
+not have to. Internally, the library
 also keeps a pointer to the object, and will pass on that pointer to your callback 
 every time it is called. So even if you decide to discard the return value, the 
 object will live on. The only way to stop the callback from being active is by 
@@ -255,3 +255,60 @@ int main()
     return 0;
 }
 ````
+
+CONSTRUCT WATCHER OBJECTS
+=========================
+
+Up to now we have registered callback methods via the Loop::onSomething()
+methods. These methods return a shared pointer to an object that keeps the
+watcher state.
+
+It is however also possible to create such objects directly, without having
+to call the Loop::onSomething methods(). This can be very convenient, because
+you can then unregister your callbacks by just destructing these objects.
+
+````c++
+#include <reactcpp.h>
+#include <unistd.h>
+#include <iostream>
+
+/**
+ *  Main application procedure
+ *  @return int
+ */
+int main()
+{
+    // create an event loop
+    React::MainLoop loop;
+
+    // we'd like to be notified when input is available on stdin
+    React::Reader reader(loop, STDIN_FILENO, [timer]() {
+    
+        // read input
+        std::string buffer;
+        std::cin >> buffer;
+    
+        // show what we read
+        std::cout << buffer << std::endl;
+    });
+
+    // run the event loop
+    loop.run();
+
+    // done
+    return 0;
+}
+````
+
+Conceptually, there is not a big difference between calling Loop::onReadable()
+to register a callback function, or by instantiating a React::Reader object
+yourself. In my opinition, the code that utilizes a call to Loop::onReadable() 
+is easier to understand and maintain, but by creating a Reader class yourself,
+you have full ownership of the class and can destruct it whenever you like.
+
+
+CHECKING FOR READABILITY
+========================
+
+
+
