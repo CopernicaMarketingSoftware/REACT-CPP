@@ -47,7 +47,16 @@ public:
      *  @return             Object that can be used to stop checking for signals
      */
     std::shared_ptr<Signal> onSignal(int signum, const SignalCallback &callback);
-    std::shared_ptr<Signal> onSignal(int signum, const Callback &callback) { return onSignal(signum, [callback](Signal *signal) { callback(); }); }
+
+    /**
+     *  Alternative onSignal() method that accepts other callbacks
+     *  @param  signum      The signal
+     *  @param  callback    Function that is called the moment the signal is caught
+     *  @return             Object that can be used to stop checking for signals
+     */
+    template <typename CALLBACK>
+    std::shared_ptr<Signal> onSignal(int signum, const CALLBACK &callback) { return onSignal(signum, SignalCallback(callback)); }
+
 };
     
 /**

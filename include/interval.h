@@ -54,6 +54,7 @@ protected:
      */
     virtual void invoke() override
     {
+        // call the callback
         _callback(this);
     }
 
@@ -65,7 +66,8 @@ public:
      *  @param  interval    Timeout interval period
      *  @param  callback    Function that is called when timer is expired
      */
-    Interval(Loop *loop, Timestamp initial, Timestamp interval, const IntervalCallback &callback) :
+    template <typename CALLBACK>
+    Interval(Loop *loop, Timestamp initial, Timestamp interval, const CALLBACK &callback) :
         _loop(loop), _callback(callback)
     {
         // store pointer to current object
@@ -77,14 +79,15 @@ public:
         // start the timer
         start();
     }
-
+    
     /**
      *  Simpler constructor
      *  @param  loop        Event loop
      *  @param  interval    Timeout interval period
      *  @param  callback    Function that is called when timer is expired
      */
-    Interval(Loop *loop, Timestamp interval, const IntervalCallback &callback) : Interval(loop, interval, interval, callback) {}
+    template <typename CALLBACK>
+    Interval(Loop *loop, Timestamp interval, const CALLBACK &callback) : Interval(loop, interval, interval, callback) {}
 
     /**
      *  No copying or moving allowed

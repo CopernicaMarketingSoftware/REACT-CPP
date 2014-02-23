@@ -26,11 +26,6 @@ private:
         // keep a shared pointer for as long as the callback is called
         auto ptr = pointer();
         
-        // we reset the object, the member shared pointer is gone so that the
-        // only owning objects are the pointer above, and any pointers that the
-        // use may have
-        reset();
-        
         // now we call the base invoke method
         Timer::invoke();
     }

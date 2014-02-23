@@ -36,6 +36,12 @@ private:
     SynchronizeCallback _callback;
 
     /**
+     *  Is it active?
+     *  @var    bool
+     */
+    bool _active = true;
+
+    /**
      *  Initialize the object
      */
     void initialize();
@@ -45,6 +51,7 @@ private:
      */
     virtual void invoke() override
     {
+        // call the callback
         _callback(this);
     }
 
@@ -54,7 +61,8 @@ public:
      *  @param  loop        Event loop
      *  @param  callback    Function that is called when synchronizer is activated
      */
-    Synchronizer(Loop *loop, const SynchronizeCallback &callback) :
+    template <typename CALLBACK>
+    Synchronizer(Loop *loop, const CALLBACK &callback) :
         _loop(loop), _callback(callback)
     {
         // store pointer to current object
@@ -80,7 +88,7 @@ public:
     virtual ~Synchronizer() 
     {
         // destructor
-        ev_async_stop(*_loop, &_watcher);
+        cancel();
     }
 
     /**
@@ -114,6 +122,29 @@ public:
     bool operator () ()
     {
         return synchronize();
+    }
+    
+    /**
+     *  Cancel the synchronizer
+     * 
+     *  The owner loop will no longer be notified, even not when the synchronize()
+     *  method is called. Calling this method makes the object effectively useless
+     * 
+     *  @return bool
+     */
+    bool cancel()
+    {
+        // skip if already stopped
+        if (!_active) return false;
+        
+        // stop now
+        ev_async_stop(*_loop, &_watcher);
+        
+        // remember that it is no longer active
+        _active = false;
+        
+        // done
+        return true;
     }
 }; 
  

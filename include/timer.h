@@ -63,9 +63,10 @@ protected:
         if (_expire <= _loop->now())
         {
             // timer is no longer active
-            _active = false;
+            cancel();
             
-            // notify parent
+            // notify parent (return value is not important, a timer is always 
+            // cancelled after it expired)
             _callback(this);
         }
         else
@@ -82,7 +83,8 @@ public:
      *  @param  timeout     Timeout period
      *  @param  callback    Function that is called when timer is expired
      */
-    Timer(Loop *loop, Timestamp timeout, const TimerCallback &callback) : _loop(loop), _callback(callback)
+    template <typename CALLBACK>
+    Timer(Loop *loop, Timestamp timeout, const CALLBACK &callback) : _loop(loop), _callback(callback)
     {
         // store pointer to current object
         _watcher.data = this;

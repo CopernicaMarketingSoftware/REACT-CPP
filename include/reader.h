@@ -65,7 +65,8 @@ public:
      *  @param  fd          File descriptor
      *  @param  callback    Function called when filedescriptor becomes readable
      */
-    Reader(Loop *loop, int fd, const ReadCallback &callback) : 
+    template <typename CALLBACK>
+    Reader(Loop *loop, int fd, const CALLBACK &callback) : 
         _loop(loop), _callback(callback)
     {
         // store pointer to current object

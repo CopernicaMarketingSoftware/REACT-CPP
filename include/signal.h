@@ -53,7 +53,7 @@ protected:
      */
     virtual void invoke() override
     {
-        // notify parent
+        // call the callback
         _callback(this);
     }
 
@@ -64,7 +64,8 @@ public:
      *  @param  signum      The signal to watch
      *  @param  callback    Function that is called when timer is expired
      */
-    Signal(MainLoop *loop, int signum, const SignalCallback &callback) : _loop(loop), _callback(callback)
+    template <typename CALLBACK>
+    Signal(MainLoop *loop, int signum, const CALLBACK &callback) : _loop(loop), _callback(callback)
     {
         // store pointer to current object
         _watcher.data = this;

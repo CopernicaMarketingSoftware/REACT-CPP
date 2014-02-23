@@ -13,10 +13,12 @@
  */
 #include <ev.h>
 #include <memory>
+#include <set>
 
 /**
  *  Other include files
  */
+#include <reactcpp/callback.h>
 #include <reactcpp/types.h>
 #include <reactcpp/loop.h>
 #include <reactcpp/mainloop.h>

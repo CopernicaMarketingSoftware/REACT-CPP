@@ -195,7 +195,15 @@ public:
      *  @return             Object that can be used to stop checking for readability
      */
     std::shared_ptr<Reader> onReadable(int fd, const ReadCallback &callback);
-    std::shared_ptr<Reader> onReadable(int fd, const Callback &callback) { return onReadable(fd, [callback](Reader *reader) { callback(); }); }
+
+    /**
+     *  Alternative onReadable() for different callback types
+     *  @param  fd          The filedescriptor
+     *  @param  callback    Function that is called the moment the fd is readable
+     *  @return             Object that can be used to stop checking for readability
+     */
+    template <typename CALLBACK>
+    std::shared_ptr<Reader> onReadable(int fd, const CALLBACK &callback) { return onReadable(fd, ReadCallback(callback)); }
 
     /**
      *  Register a function that is called the moment a filedescriptor becomes
@@ -214,7 +222,15 @@ public:
      *  @return             Object that can be used to stop checking for writability
      */
     std::shared_ptr<Writer> onWritable(int fd, const WriteCallback &callback);
-    std::shared_ptr<Writer> onWritable(int fd, const Callback &callback) { return onWritable(fd, [callback](Writer *writer) { callback(); }); }
+
+    /**
+     *  Alternative onWritable() method that accepts alternative callbacks
+     *  @param  fd          The filedescriptor
+     *  @param  callback    Function that is called the moment the fd is readable
+     *  @return             Object that can be used to stop checking for writability
+     */
+    template <typename CALLBACK>
+    std::shared_ptr<Writer> onWritable(int fd, const CALLBACK &callback) { return onWritable(fd, WriteCallback(callback)); }
     
     /**
      *  Register a timeout to be called in a certain amount of time
@@ -232,7 +248,15 @@ public:
      *  @return             Object that can be used to stop or edit the timer
      */
     std::shared_ptr<Timer> onTimeout(Timestamp timeout, const TimerCallback &callback);
-    std::shared_ptr<Timer> onTimeout(Timestamp timeout, const Callback &callback) { return onTimeout(timeout, [callback](Timer *timer) { callback(); }); }
+    
+    /**
+     *  Alternative onTimeout() function that accepts a range of other callback types
+     *  @param  timeout     The timeout in seconds
+     *  @param  callback    Function that is called when the timer expires
+     *  @return             Object that can be used to stop or edit the timer
+     */
+    template <typename CALLBACK>
+    std::shared_ptr<Timer> onTimeout(Timestamp timeout, const CALLBACK &callback) { return onTimeout(timeout, TimerCallback(callback)); }
     
     /**
      *  Register a function to be called periodically at fixed intervals
@@ -251,9 +275,18 @@ public:
      *  @return             Object that can be used to stop or edit the interval
      */
     std::shared_ptr<Interval> onInterval(Timestamp initial, Timestamp timeout, const IntervalCallback &callback);
-    std::shared_ptr<Interval> onInterval(Timestamp initial, Timestamp timeout, const Callback &callback) { return onInterval(initial, timeout, [callback](Interval *interval) { callback(); }); }
     std::shared_ptr<Interval> onInterval(Timestamp timeout, const IntervalCallback &callback) { return onInterval(timeout, timeout, callback); }
-    std::shared_ptr<Interval> onInterval(Timestamp timeout, const Callback &callback) { return onInterval(timeout, timeout, callback); }
+
+    /**
+     *  Alternative onTimeout() function thats accepts a range of other callback types
+     *  @param  timeout     The timeout in seconds
+     *  @param  callback    Function that is called when the timer expires
+     *  @return             Object that can be used to stop or edit the timer
+     */
+    template <typename CALLBACK>
+    std::shared_ptr<Interval> onInterval(Timestamp initial, Timestamp timeout, const CALLBACK &callback) { return onInterval(initial, timeout, IntervalCallback(callback)); }
+    template <typename CALLBACK>
+    std::shared_ptr<Interval> onInterval(Timestamp timeout, const IntervalCallback &callback) { return onInterval(timeout, timeout, IntervalCallback(callback)); }
     
     /**
      *  Register a synchronize function
@@ -270,7 +303,14 @@ public:
      *  @return             Object that can be used to stop watching, or to synchronize
      */
     std::shared_ptr<Synchronizer> onSynchronize(const SynchronizeCallback &callback);
-    std::shared_ptr<Synchronizer> onSynchronize(const Callback &callback) { return onSynchronize([callback](Synchronizer *synchronizer) { callback(); }); }
+
+    /**
+     *  Alternative onSynchronize method that accepts other callbacks
+     *  @param  callback    The callback that is called 
+     *  @return             Object that can be used to stop watching, or to synchronize
+     */
+    template <typename CALLBACK>
+    std::shared_ptr<Synchronizer> onSynchronize(const CALLBACK &callback) { return onSynchronize(SynchronizeCallback(callback)); }
 
 };
 

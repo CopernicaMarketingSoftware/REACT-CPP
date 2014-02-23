@@ -25,13 +25,12 @@ class Signal;
  *  Timestamp type is a wrapper around libev
  */
 using Timestamp = ev_tstamp;
-using Callback = std::function<void()>;
-using ReadCallback = std::function<void(Reader *)>;
-using WriteCallback = std::function<void(Writer *)>;
-using TimerCallback = std::function<void(Timer *)>;
-using IntervalCallback = std::function<void(Interval *)>;
-using SynchronizeCallback = std::function<void(Synchronizer *)>;
-using SignalCallback = std::function<void(Signal *)>;
+using ReadCallback = Callback<Reader>;
+using WriteCallback = Callback<Writer>;
+using TimerCallback = Callback<Timer>;
+using IntervalCallback = Callback<Interval>;
+using SynchronizeCallback = Callback<Synchronizer>;
+using SignalCallback = Callback<Signal>;
 
 /**
  *  End namespace

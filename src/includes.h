@@ -8,6 +8,8 @@
 #include <ev.h>
 #include <memory>
 #include <map>
+#include <set>
+#include "../include/callback.h"
 #include "../include/types.h"
 #include "../include/loop.h"
 #include "../include/mainloop.h"
