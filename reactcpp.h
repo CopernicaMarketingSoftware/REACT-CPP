@@ -20,6 +20,7 @@
 #include <reactcpp/types.h>
 #include <reactcpp/loop.h>
 #include <reactcpp/mainloop.h>
+#include <reactcpp/watcher.h>
 #include <reactcpp/reader.h>
 #include <reactcpp/writer.h>
 #include <reactcpp/signal.h>

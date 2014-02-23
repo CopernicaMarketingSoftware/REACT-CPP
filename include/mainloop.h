@@ -28,7 +28,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~MainLoop();
+    virtual ~MainLoop() {}
     
     /**
      *  Register a function that is called the moment a signal is fired.
