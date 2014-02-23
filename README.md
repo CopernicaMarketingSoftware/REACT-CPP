@@ -502,12 +502,19 @@ a parameter and one without, and the synchronizer can be registered via a call
 to Loop::onSynchronize() and by creating a Synchroninzer object directly:
 
 ````c++
-std::shared_ptr<Synchronizer> Loop::onSynchronize(const SynchronizeCallback &callback);
-
+// example how to install a synchronizer via the Loop class
 loop.onSynchronize([](Synchronizer *synchronizer) { ... });
 loop.onSynchronize([]() { ... });
 
+// example how to install the synchronizer as an object
 Synchronizer synchronizer(loop, [](Synchronizer &synchronizer) { ... });
 Synchronizer synchronizer(loop, []() { ... });
 ````
+
+When you use this technology to synchronize threads, you probably need to have
+some shared data. You could for example use a queue that is accessible by both
+threads. The worker thread pushes results to it, then calls synchronizer->synchronnize()
+to notify the master thread, which can then pick up the results from the queue.
+If the queue object is not thread safe, you must make sure that you protect
+access to it, for example by using mutex variables.
 
