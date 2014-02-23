@@ -423,15 +423,16 @@ SIgnal signal(&loop, SIGTERM, []() { ... });
 THREAD SYNCHRONIZATION
 ======================
 
-Let's introduce a new topic that has not been addressed in one of the
+Let's introduce a topic that has not been addressed in one of the
 examples: running multiple threads and optionally multiple thread loops.
 
 If your application runs multiple threads, there is a pretty good chance
 that sooner or later you want to get these threads in sync. When you have, for
 example, a worker thread that wants to report its results back to the
-main event loop, it should somehow notify the main thread that the result of the
-calculatations are somewhere to be picked up. This can be done with the
-Loop::onSynchronize() method.
+main thread, it should somehow notify that thread that the result of the
+calculatations are somewhere to be picked up. If the main thread is busy running
+an event loop, it should be able to interupt that event loop, so that the data 
+can be picked up. This all can be done with the Loop::onSynchronize() method.
 
 ````c++
 #include <reactcpp.h>
@@ -447,10 +448,10 @@ int main()
     // create a thread loop
     React::MainLoop loop;
     
-    // install an onSynchronize callback that is called when a worker thread
-    // is ready with its task, the returned synchronizer object is of type
-    // std::shared_ptr<Synchronizer>, and contains a thread safe pointer that
-    // can be access from the other thread to notify us
+    // install an callback that can be called by a worker thread.
+    // the returned synchronizer object is of type std::shared_ptr<Synchronizer>, 
+    // and contains a thread safe object that can be accessed from other threads 
+    // to notify us
     auto synchronizer = loop.onSynchronize([]() {
         std::cout << "other thread has finished running" << std::endl;
     });
@@ -488,14 +489,12 @@ int main()
 ````
 
 The example above demonstrates how threads can synchronize with each other.
-First, you must create an endpoint that the other thread can use to call the
-main thread, and you must install a handler that will be called whenever the
-other thread uses that endpoint. Both steps can be taken by just calling
-Loop::onSynchronize() to install the handler. The endpoint object is returned
-by that method.
-
-After you've received the endpoint, you can pass it to the other thread so that
-it can call it.
+First, you create an endpoint that the other thread can use to call the
+main thread, and you install a handler that will be called when the
+other thread uses that endpoint. Both steps are taken by a simple call to
+Loop::onSynchronize(). This installs the callback function that runs in the 
+main thread, and it returns the thread safe endpoint that can be used by other
+thread to interup the main event loop.
 
 The Synchronizer is similar to classes like React::Reader, React::Writer, 
 React::Timer, etcetera. And the callback also comes in two forms: one with
