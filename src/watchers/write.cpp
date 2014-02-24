@@ -1,5 +1,5 @@
 /**
- *  Reader.cpp
+ *  Write.cpp
  *
  *  @copyright 2014 Copernica BV
  */
@@ -28,12 +28,11 @@ static void onActive(struct ev_loop *loop, ev_io *watcher, int events)
 /**
  *  Initialize
  *  @param  fd
- *  @param  flags
  */
-void Reader::initialize(int fd)
+void WriteWatcher::initialize(int fd)
 {
     // initialize the watcher
-    ev_io_init(&_watcher, onActive, fd, EV_READ);
+    ev_io_init(&_watcher, onActive, fd, EV_WRITE);
 }
 
 /**

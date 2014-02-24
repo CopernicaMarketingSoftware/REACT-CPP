@@ -115,7 +115,7 @@ int main()
     React::MainLoop loop;
     
     // we'd like to be notified when input is available on stdin
-    loop.onReadable(STDIN_FILENO, [](React::Reader *reader) {
+    loop.onReadable(STDIN_FILENO, [](React::ReadWatcher *reader) {
     
         // read input
         std::string buffer;
@@ -138,13 +138,13 @@ int main()
 
 The program above is only interested in read events until the first line
 from stdin has been read. After that it calls the cancel() method on the
-React::Reader object, to inform the event loop that it is no longer interested
-in read events.
+React::ReadWatcher object, to inform the event loop that it is no longer 
+interested in read events.
 
 In the above example, this also means that the program automatically exits after
 the first line has been read. The reason for this is that the run() method of 
 the React::Loop and React::MainLoop classes automatically stops running when 
-there are no more callback functions active. By calling the Reader::cancel()
+there are no more callback functions active. By calling the ReadWatcher::cancel()
 method, the last and only registered callback function is cancelled, and the
 event loop has nothing left to monitor.
 
@@ -152,11 +152,11 @@ The type of the parameter that is passed to your callback function depends on
 the type of callback function that you have registered.
 
 ````c++
-loop.onReadable(fd, [](React::Reader *reader) { ... });
-loop.onWritable(fd, [](React::Writer *writer) { ... });
-loop.onTimeout(time, [](React::Timer *timer) { ... });
-loop.onInterval(time, [](React::Interval *interval) { ... });
-loop.onSignal(signum, [](React::Signal *signal) { ... });
+loop.onReadable(fd, [](React::ReadWatcher *watcher) { ... });
+loop.onWritable(fd, [](React::WriteWatcher *watcher) { ... });
+loop.onTimeout(time, [](React::TimeoutWatcher *watcher) { ... });
+loop.onInterval(time, [](React::IntervalWatcher *watcher) { ... });
+loop.onSignal(signum, [](React::SignalWatcher *watcher) { ... });
 ````
 
 The objects that are passed to your callback function all have in common that
@@ -168,8 +168,8 @@ to deal with the specific behavior of the item being watched.
 RETURN VALUE OF LOOP METHODS
 ============================
 
-The objects that are passed to the callback functions (React::Reader, 
-React::writer, etc) are also returned from the event-registering functions.
+The objects that are passed to the callback functions (React::ReadWatcher, 
+React::WriteWatcher, etc) are also returned from the event-registering functions.
 This means that it is possible to store the return value of a call to 
 Loop::onReadable() in a variable, and that you will not have to wait for the
 callback to be called to cancel further calls to it.
@@ -206,7 +206,7 @@ int main()
     React::MainLoop loop;
 
     // set a timer to stop the application if it is idle for five seconds
-    // note that the type of 'timer' is std::shared_ptr<React::Timer>
+    // note that the type of 'timer' is std::shared_ptr<React::TimeoutWatcher>
     auto timer = loop.onTimeout(5.0, []() {
     
         // report that the timer expired
@@ -217,7 +217,7 @@ int main()
     });
     
     // we'd like to be notified when input is available on stdin
-    // the type of 'reader' is std::shared_ptr<React::Reader>
+    // the type of 'reader' is std::shared_ptr<React::ReadWatcher>
     auto reader = loop.onReadable(STDIN_FILENO, [timer]() {
     
         // read input
@@ -242,7 +242,7 @@ int main()
         reader->cancel();
         
         // stop the application in one second
-        loop.onTimeout(1.0, [](Timer *timer) {
+        loop.onTimeout(1.0, []() {
         
             // exit the application
             exit(0);
@@ -282,7 +282,7 @@ int main()
     React::MainLoop loop;
 
     // we'd like to be notified when input is available on stdin
-    React::Reader reader(loop, STDIN_FILENO, []() {
+    React::ReadWatcher reader(loop, STDIN_FILENO, []() {
     
         // read input
         std::string buffer;
@@ -301,9 +301,9 @@ int main()
 ````
 
 Conceptually, there is not a big difference between calling Loop::onReadable()
-to register a callback function, or by instantiating a React::Reader object
+to register a callback function, or by instantiating a React::ReadWatcher object
 yourself. In my opinition, the code that utilizes a call to Loop::onReadable() 
-is easier to understand and maintain, but by creating a Reader class yourself,
+is easier to understand and maintain, but by creating a ReadWatcher class yourself,
 you have full ownership of the class and can destruct it whenever you like -
 which can be useful too.
 
@@ -315,30 +315,30 @@ Filedescriptors can be checked for activity by registering callbacks for
 readability and writability. The loop object has two methods for that:
 
 ````c++
-std::shared_ptr<Reader> Loop::onReadable(int fd, const ReadCallback &callback);
-std::shared_ptr<Writer> Loop::onWritable(int fd, const WriteCallback &callback);
+std::shared_ptr<ReadWatcher> Loop::onReadable(int fd, const ReadCallback &callback);
+std::shared_ptr<WriteWatcher> Loop::onWritable(int fd, const WriteCallback &callback);
 ````
 
 Two possible callback signatures are accepted, one that takes a pointer to a
-watcher object (React::Reader* for the callback to onReadable(), and 
-React::Writer* for the callback to onWritable()), and a callback that does not
+watcher object (React::ReadWatcher* for the callback to onReadable(), and 
+React::WriteWatcher* for the callback to onWritable()), and a callback that does not
 accept parameters at all.
 
 ````c++
-loop.onReadable(fd, [](Reader *reader) { ... });
+loop.onReadable(fd, [](ReadWatcher *watcher) { ... });
 loop.onReadable(fd, []() { ... });
-loop.onWritable(fd, [](Writer *writer) { ... });
+loop.onWritable(fd, [](WriteWatcher *watcher) { ... });
 loop.onWritable(fd, []() { ... });
 ````
 
-You can also create a Reader or Writer object yourself. In that case you will
+You can also create a ReadWatcher or WriteWatcher object yourself. In that case you will
 not have to use the Loop::onReadable() or Loop::onWritable() methods:
 
 ````c++
-Reader reader(&loop, fd, [](Reader *reader) { ... });
-Reader reader(&loop, fd, []() { ... });
-Writer writer(&loop, fd, [](Writer *writer) { ... });
-Writer writer(&loop, fd, []() { ... });
+ReadWatcher watcher(&loop, fd, [](ReadWatcher *watcher) { ... });
+ReadWatcher watcher(&loop, fd, []() { ... });
+WriteWatcher watcher(&loop, fd, [](WriteWatcher *watcher) { ... });
+WriteWatcher watcher(&loop, fd, []() { ... });
 ````
 
 TIMERS AND INTERVALS
@@ -353,13 +353,13 @@ well as the interval between all subsequent calls. If you omit the initial time,
 the callback will be first called after the first interval has passed.
 
 ````c++
-std::shared_ptr<Timer> 
-Loop::onTimeout(Timestamp seconds, const TimerCallback &callback);
+std::shared_ptr<TimeoutWatcher> 
+Loop::onTimeout(Timestamp seconds, const TimeoutCallback &callback);
 
-std::shared_ptr<Interval> 
+std::shared_ptr<IntervalWatcher> 
 Loop::onInterval(Timestamp interval, const IntervalCallback &callback);
 
-std::shared_ptr<Interval> 
+std::shared_ptr<IntervalWatcher> 
 Loop::onInterval(Timestamp initial, Timestamp interval, const IntervalCallback &callback);
 ````
 
@@ -367,24 +367,24 @@ Just like the callbacks for filedescriptors, the callbacks for timers and interv
 also come in two forms: with and without a parameter.
 
 ````c++
-loop.onTimeout(3.0, [](Timer *timer) { ... });
+loop.onTimeout(3.0, [](TimeoutWatcher *watcher) { ... });
 loop.onTimeout(3.0, []() { ... });
-loop.onInterval(5.0, [](Interval *interval) { ... });
+loop.onInterval(5.0, [](IntervalWatcher *watcher) { ... });
 loop.onInterval(5.0, []() { ... });
-loop.onInterval(0.0, 5.0, [](Interval *interval) { ... });
+loop.onInterval(0.0, 5.0, [](IntervalWatcher *watcher) { ... });
 loop.onInterval(0.0, 5.0, []() { ... });
 ````
 
-And you can of course also instantiate React::Timer and React::Interval objects
-directly:
+And you can of course also instantiate React::TimeoutWatcher and 
+React::IntervalWatcher objects directly:
 
 ````c++
-Timer timer(&loop, 3.0, [](Timer *timer) { ... });
-Timer timer(&loop, 3.0, []() { ... });
-Interval interval(&loop, 5.0, [](Interval *interval) { ... });
-Interval interval(&loop, 5.0, []() { ... });
-Interval interval(&loop, 2.0, 5.0, [](Interval *interval) { ... });
-Interval interval(&loop, 2.0, 5.0, []() { ... });
+TimeoutWatcher watcher(&loop, 3.0, [](TimeoutWatcher *watcher) { ... });
+TimeoutWatcher watcher(&loop, 3.0, []() { ... });
+IntervalWatcher watcher(&loop, 5.0, [](IntervalWatcher *watcher) { ... });
+IntervalWatcher watcher(&loop, 5.0, []() { ... });
+IntervalWatcher watcher(&loop, 2.0, 5.0, [](IntervalWatcher *watcher) { ... });
+IntervalWatcher watcher(&loop, 2.0, 5.0, []() { ... });
 ````
 
 SIGNALS
@@ -401,13 +401,13 @@ for filedescriptors or timers. The loop object has a simple onSignal() method
 for it:
 
 ````c++
-std::shared_ptr<Signal> Loop::onSignal(int signum, const SignalCallback &callback);
+std::shared_ptr<SignalWatcher> MainLoop::onSignal(int signum, const SignalCallback &callback);
 ````
 
 And the callback function comes (of course) in two versions:
 
 ````c++
-loop.onSignal(SIGTERM, [](Signal *signal) { ... });
+loop.onSignal(SIGTERM, [](SignalWatcher *watcher) { ... });
 loop.onSignal(SIGTERM, []() { ... });
 ````
 
@@ -415,10 +415,44 @@ And for signals it is of course also possible to bypass the methods on the
 loop class, and create a React::Signal object yourself:
 
 ````c++
-Signal signal(&loop, SIGTERM, [](Signal *signal) { ... });
-SIgnal signal(&loop, SIGTERM, []() { ... });
+SignalWatcher watcher(&loop, SIGTERM, [](SignalWatcher *watcher) { ... });
+SIgnalWatcher watcher(&loop, SIGTERM, []() { ... });
 ````
 
+CHILD PROCESSES
+===============
+
+The MainLoop class also allows you to watch for status change events from child
+processes. This is useful if your application forks off child processes, and 
+wants to be notified when one of these child processes changes its status (like
+exiting).
+
+Both the pid and trace parameters are optional. If you do not specify a pid (or
+set the parameter to zero), your callback function will be called for every
+single child process that changes its status. The boolean trace parameter can
+be used to indicate whether you'd like to be notified for every possible status
+change (including changes between paused and running state), or only when child
+processes terminate. Set trace to true to receive all notifications, and to false
+to receive only for process exits.
+
+````c++
+std::shared_ptr<StatusWatcher> MainLoop::onStatusChange(pid_t pid, bool trace, const SignalCallback &callback);
+````
+
+And the callback function comes (of course) in two versions:
+
+````c++
+loop.onStatusChange(pid, false, [](StatusWatcher *watcher) { ... });
+loop.onStatusChange(pid, false, []() { ... });
+````
+
+And just like all other watcher objects, you can also create StatusWatcher objects
+yourself:
+
+````c++
+StatusWatcher watcher(&loop, pid, trace, [](StatusWatcher *watcher) { ... });
+StatusWatcher watcher(&loop, pid, trace, []() { ... });
+````
 
 THREAD SYNCHRONIZATION
 ======================
@@ -449,7 +483,7 @@ int main()
     React::MainLoop loop;
     
     // install a callback that can be called by a worker thread.
-    // the returned synchronizer object is of type std::shared_ptr<Synchronizer>, 
+    // the returned synchronizer object is of type std::shared_ptr<SynchronizeWatcher>, 
     // and contains a thread safe object that can be accessed from other threads 
     // to notify us
     auto synchronizer = loop.onSynchronize([]() {
@@ -496,19 +530,19 @@ Loop::onSynchronize(). This installs the callback function that runs in the
 main thread, and it returns the thread safe endpoint that can be used by other
 thread to interup the main event loop.
 
-The Synchronizer is similar to classes like React::Reader, React::Writer, 
-React::Timer, etcetera. And the callback also comes in two forms: one with
-a parameter and one without, and the synchronizer can be registered via a call
-to Loop::onSynchronize() and by creating a Synchroninzer object directly:
+The SynchronizeWatcher is similar to classes like React::ReadWatcher, React::WriteWatcher, 
+React::TimeoutWatcher, etcetera. And the callback also comes in two forms: one with
+a parameter and one without, and the watcher can be registered via a call
+to Loop::onSynchronize() and by creating a Synchronizer object directly:
 
 ````c++
 // example how to install a synchronizer via the Loop class
-loop.onSynchronize([](Synchronizer *synchronizer) { ... });
+loop.onSynchronize([](SynchronizeWatcher *watcher) { ... });
 loop.onSynchronize([]() { ... });
 
 // example how to install the synchronizer as an object
-Synchronizer synchronizer(loop, [](Synchronizer &synchronizer) { ... });
-Synchronizer synchronizer(loop, []() { ... });
+SynchronizeWatcher watcher(loop, [](SynchronizeWatcher *watcher) { ... });
+SynchronizeWatcher watcher(loop, []() { ... });
 ````
 
 When you use this technology to synchronize threads, you probably need to have

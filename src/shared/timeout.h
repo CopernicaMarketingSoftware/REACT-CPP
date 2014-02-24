@@ -1,7 +1,7 @@
 /**
- *  SharedTimer.h
+ *  SharedTimeoutWatcher.h
  *
- *  Timer that is managed by the loop, and that can be shared with the outside
+ *  TimeoutWatcher that is managed by the loop, and that can be shared with the outside
  *  world.
  *
  *  @copyright 2014 Copernica BV
@@ -15,7 +15,7 @@ namespace React {
 /**
  *  Class definition
  */
-class SharedTimer : public Shared<Timer>, public Timer
+class SharedTimeoutWatcher : public Shared<TimeoutWatcher>, public TimeoutWatcher
 {
 private:
     /**
@@ -27,7 +27,7 @@ private:
         auto ptr = pointer();
         
         // now we call the base invoke method
-        Timer::invoke();
+        TimeoutWatcher::invoke();
     }
 
 public:
@@ -37,12 +37,12 @@ public:
      *  @param  timeout
      *  @param  callback
      */
-    SharedTimer(Loop *loop, Timestamp timeout, const TimerCallback &callback) : Shared(this), Timer(loop, timeout, callback) {}
+    SharedTimeoutWatcher(Loop *loop, Timestamp timeout, const TimeoutCallback &callback) : Shared(this), TimeoutWatcher(loop, timeout, callback) {}
     
     /**
      *  Destructor
      */
-    virtual ~SharedTimer() {}
+    virtual ~SharedTimeoutWatcher() {}
     
     /**
      *  Start the timer
@@ -51,7 +51,7 @@ public:
     virtual bool start() override
     {
         // call base
-        if (!Timer::start()) return false;
+        if (!TimeoutWatcher::start()) return false;
         
         // object lives again, fix the shared pointer
         restore();
@@ -67,7 +67,7 @@ public:
     virtual bool cancel() override
     {
         // call base
-        if (!Timer::cancel()) return false;
+        if (!TimeoutWatcher::cancel()) return false;
         
         // object is cancelled, forget shared pointer
         reset();

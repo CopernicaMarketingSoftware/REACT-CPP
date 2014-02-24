@@ -1,5 +1,5 @@
 /**
- *  SharedWriter.h
+ *  SharedWriteWatcher.h
  *
  *  Class that is only used internally, and that is constructed for writers
  *  that are constructed via the Loop::onWritable() method. It holds a shared
@@ -16,7 +16,7 @@ namespace React {
 /**
  *  Class definition
  */
-class SharedWriter : public Shared<Writer>, public Writer
+class SharedWriteWatcher : public Shared<WriteWatcher>, public WriteWatcher
 {
 private:
     /**
@@ -30,7 +30,7 @@ private:
         auto ptr = pointer();
         
         // now we call the base invoke method
-        Writer::invoke();
+        WriteWatcher::invoke();
     }
 
 public:
@@ -40,12 +40,12 @@ public:
      *  @param  fd          File descriptor
      *  @param  callback    Function called when filedescriptor becomes writable
      */
-    SharedWriter(Loop *loop, int fd, const WriteCallback &callback) : Shared(this), Writer(loop, fd, callback) {}
+    SharedWriteWatcher(Loop *loop, int fd, const WriteCallback &callback) : Shared(this), WriteWatcher(loop, fd, callback) {}
     
     /**
      *  Destructor
      */
-    virtual ~SharedWriter() {}
+    virtual ~SharedWriteWatcher() {}
 
     /**
      *  Start/resume the watcher
@@ -54,7 +54,7 @@ public:
     virtual bool resume() override
     {
         // call base
-        if (!Writer::resume()) return false;
+        if (!WriteWatcher::resume()) return false;
         
         // make sure the shared pointer is valid, so that we have a reference to ourselves
         restore();
@@ -70,7 +70,7 @@ public:
     virtual bool cancel() override
     {
         // call base
-        if (!Writer::cancel()) return false;
+        if (!WriteWatcher::cancel()) return false;
         
         // because the watcher is no longer running, we no longer have to keep a pointer to ourselves
         reset();

@@ -1,7 +1,7 @@
 /**
- *  SharedSignal.h
+ *  SharedStatusWatcher.h
  *
- *  Signal watcher that is managed by the loop, and that can be shared with the 
+ *  StatisWatcher watcher that is managed by the loop, and that can be shared with the 
  *  outside world.
  *
  *  @copyright 2014 Copernica BV
@@ -15,7 +15,7 @@ namespace React {
 /**
  *  Class definition
  */
-class SharedSignal : public Shared<Signal>, public Signal
+class SharedStatusWatcher : public Shared<StatusWatcher>, public StatusWatcher
 {
 private:
     /**
@@ -29,22 +29,23 @@ private:
         auto ptr = pointer();
         
         // now we call the base invoke method
-        Signal::invoke();
+        StatusWatcher::invoke();
     }
 
 public:
     /**
      *  Constructor
      *  @param  loop
-     *  @param  signum
+     *  @param  pid
+     *  @param  trace
      *  @param  callback
      */
-    SharedSignal(MainLoop *loop, int signum, const SignalCallback &callback) : Shared(this), Signal(loop, signum, callback) {}
+    SharedStatusWatcher(MainLoop *loop, pid_t pid, bool trace, const StatusCallback &callback) : Shared(this), StatusWatcher(loop, pid, trace, callback) {}
     
     /**
      *  Destructor
      */
-    virtual ~SharedSignal() {}
+    virtual ~SharedStatusWatcher() {}
     
     /**
      *  Start the signal watcher
@@ -53,7 +54,7 @@ public:
     virtual bool start() override
     {
         // call base
-        if (!Signal::start()) return false;
+        if (!StatusWatcher::start()) return false;
         
         // make sure the shared pointer is valid, so that we have a reference to ourselves
         restore();
@@ -69,7 +70,7 @@ public:
     virtual bool cancel() override
     {
         // call base
-        if (!Signal::cancel()) return false;
+        if (!StatusWatcher::cancel()) return false;
         
         // because the signal watcher is no longer running, we no longer have to keep a pointer to ourselves
         reset();

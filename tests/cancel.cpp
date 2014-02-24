@@ -8,7 +8,7 @@ int main()
     React::MainLoop loop;
     
     // we'd like to be notified when input is available on stdin
-    loop.onReadable(STDIN_FILENO, [](React::Reader *reader) {
+    loop.onReadable(STDIN_FILENO, [](React::ReadWatcher *reader) {
     
         // read input
         std::string buffer;

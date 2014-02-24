@@ -14,7 +14,7 @@ namespace React {
 /**
  *  Class definition
  */
-class Writer : private Watcher
+class WriteWatcher : private Watcher
 {
 private:
     /**
@@ -65,7 +65,7 @@ public:
      *  @param  callback    Function called when filedescriptor becomes readable
      */
     template <typename CALLBACK>
-    Writer(Loop *loop, int fd, const CALLBACK &callback) : 
+    WriteWatcher(Loop *loop, int fd, const CALLBACK &callback) : 
         _loop(loop), _callback(callback)
     {
         // store pointer to current object
@@ -82,13 +82,13 @@ public:
      *  No copying or moving allowed
      *  @param  that
      */
-    Writer(const Writer &that) = delete;
-    Writer(Writer &&that) = delete;
+    WriteWatcher(const WriteWatcher &that) = delete;
+    WriteWatcher(WriteWatcher &&that) = delete;
 
     /**
      *  Destructor
      */
-    virtual ~Writer()
+    virtual ~WriteWatcher()
     {
         cancel();
     }
@@ -97,8 +97,8 @@ public:
      *  No copying or moving
      *  @param  that
      */
-    Timer &operator=(const Timer &that) = delete;
-    Timer &operator=(Timer &&that) = delete;
+    WriteWatcher &operator=(const WriteWatcher &that) = delete;
+    WriteWatcher &operator=(WriteWatcher &&that) = delete;
     
     /**
      *  Cancel the watcher

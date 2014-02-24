@@ -1,5 +1,5 @@
 /**
- *  Synchronizer.cpp
+ *  Timeout.cpp
  * 
  *  @copyright 2014 Copernica BV
  */
@@ -11,12 +11,12 @@
 namespace React {
 
 /**
- *  Callback method that is called when the synchronizer is triggered
+ *  Callback method that is called when the timer expires
  *  @param  loop        The loop in which the event was triggered
  *  @param  watcher     Internal watcher object
  *  @param  revents     Events triggered
  */
-static void onSynchronize(struct ev_loop *loop, ev_async *watcher, int revents)
+static void onExpired(struct ev_loop *loop, ev_timer *watcher, int revents)
 {
     // retrieve the reader
     Watcher *object = (Watcher *)watcher->data;
@@ -29,10 +29,13 @@ static void onSynchronize(struct ev_loop *loop, ev_async *watcher, int revents)
  *  Initialize the object
  *  @param  timeout
  */
-void Synchronizer::initialize()
+void TimeoutWatcher::initialize(Timestamp timeout)
 {
-    // initialize the async
-    ev_async_init(&_watcher, onSynchronize);
+    // set the expiration time
+    _expire = _loop->now() + timeout;
+    
+    // initialize the timer
+    ev_timer_init(&_watcher, onExpired, timeout, 0.0);
 }
 
 

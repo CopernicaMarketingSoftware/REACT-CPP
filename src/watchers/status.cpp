@@ -1,5 +1,5 @@
 /**
- *  Interval.cpp
+ *  Status.cpp
  * 
  *  @copyright 2014 Copernica BV
  */
@@ -11,12 +11,12 @@
 namespace React {
 
 /**
- *  Callback method that is called when the timer expires
+ *  Callback method that is called when child process changes status
  *  @param  loop        The loop in which the event was triggered
  *  @param  watcher     Internal watcher object
  *  @param  revents     Events triggered
  */
-static void onExpired(struct ev_loop *loop, ev_timer *watcher, int revents)
+static void onStatusChange(struct ev_loop *loop, ev_child *watcher, int revents)
 {
     // retrieve the reader
     Watcher *object = (Watcher *)watcher->data;
@@ -27,13 +27,13 @@ static void onExpired(struct ev_loop *loop, ev_timer *watcher, int revents)
     
 /**
  *  Initialize the object
- *  @param  initial
- *  @param  timeout
+ *  @param  pid
+ *  @param  trace
  */
-void Interval::initialize(Timestamp initial, Timestamp timeout)
+void StatusWatcher::initialize(pid_t pid, bool trace)
 {
-    // initialize the timer
-    ev_timer_init(&_watcher, onExpired, initial, timeout);
+    // initialize the signal watcher
+    ev_child_init(&_watcher, onStatusChange, pid, trace ? 1 : 0);
 }
 
 /**

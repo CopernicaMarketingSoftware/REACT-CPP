@@ -1,5 +1,5 @@
 /**
- *  Signal.h
+ *  SignalWatcher.h
  *
  *  Object that watches for signals to be fired.
  *
@@ -14,7 +14,7 @@ namespace React {
 /**
  *  Class definition
  */
-class Signal : private Watcher
+class SignalWatcher : private Watcher
 {
 private:
     /**
@@ -65,7 +65,7 @@ public:
      *  @param  callback    Function that is called when timer is expired
      */
     template <typename CALLBACK>
-    Signal(MainLoop *loop, int signum, const CALLBACK &callback) : _loop(loop), _callback(callback)
+    SignalWatcher(MainLoop *loop, int signum, const CALLBACK &callback) : _loop(loop), _callback(callback)
     {
         // store pointer to current object
         _watcher.data = this;
@@ -81,13 +81,13 @@ public:
      *  No copying or moving allowed
      *  @param  that
      */
-    Signal(const Signal &that) = delete;
-    Signal(Signal &&that) = delete;
+    SignalWatcher(const SignalWatcher &that) = delete;
+    SignalWatcher(SignalWatcher &&that) = delete;
 
     /**
      *  Destructor
      */
-    virtual ~Signal() 
+    virtual ~SignalWatcher() 
     {
         // cancel the timer
         cancel();
@@ -97,8 +97,8 @@ public:
      *  No copying or moving
      *  @param  that
      */
-    Signal &operator=(const Signal &that) = delete;
-    Signal &operator=(Signal &&that) = delete;
+    SignalWatcher &operator=(const SignalWatcher &that) = delete;
+    SignalWatcher &operator=(SignalWatcher &&that) = delete;
     
     /**
      *  Start the signal watcher

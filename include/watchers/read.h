@@ -1,5 +1,5 @@
 /**
- *  Reader.h
+ *  ReadWatcher.h
  *
  *  Class that represents an object that is busy watching a filedescriptor  
  *  for readability
@@ -15,7 +15,7 @@ namespace React {
 /**
  *  Class definition
  */
-class Reader : private Watcher
+class ReadWatcher : private Watcher
 {
 private:
     /**
@@ -66,7 +66,7 @@ public:
      *  @param  callback    Function called when filedescriptor becomes readable
      */
     template <typename CALLBACK>
-    Reader(Loop *loop, int fd, const CALLBACK &callback) : 
+    ReadWatcher(Loop *loop, int fd, const CALLBACK &callback) : 
         _loop(loop), _callback(callback)
     {
         // store pointer to current object
@@ -83,13 +83,13 @@ public:
      *  No copying or moving allowed
      *  @param  that
      */
-    Reader(const Reader &that) = delete;
-    Reader(Reader &&that) = delete;
+    ReadWatcher(const ReadWatcher &that) = delete;
+    ReadWatcher(ReadWatcher &&that) = delete;
 
     /**
      *  Destructor
      */
-    virtual ~Reader()
+    virtual ~ReadWatcher()
     {
         cancel();
     }
@@ -98,8 +98,8 @@ public:
      *  No copying or moving
      *  @param  that
      */
-    Reader &operator=(const Reader &that) = delete;
-    Reader &operator=(Reader &&that) = delete;
+    ReadWatcher &operator=(const ReadWatcher &that) = delete;
+    ReadWatcher &operator=(ReadWatcher &&that) = delete;
     
     /**
      *  Cancel the watcher

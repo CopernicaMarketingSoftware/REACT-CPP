@@ -1,5 +1,5 @@
 /**
- *  Timer.h
+ *  Timeout.h
  *
  *  Timer that fires once
  *
@@ -14,7 +14,7 @@ namespace React {
 /**
  *  Class definition
  */
-class Timer : private Watcher
+class TimeoutWatcher : private Watcher
 {
 private:
     /**
@@ -31,9 +31,9 @@ private:
 
     /**
      *  Callback function
-     *  @var    TimerCallback
+     *  @var    TimeoutCallback
      */
-    TimerCallback _callback;
+    TimeoutCallback _callback;
 
     /**
      *  Is the timer active?
@@ -84,7 +84,7 @@ public:
      *  @param  callback    Function that is called when timer is expired
      */
     template <typename CALLBACK>
-    Timer(Loop *loop, Timestamp timeout, const CALLBACK &callback) : _loop(loop), _callback(callback)
+    TimeoutWatcher(Loop *loop, Timestamp timeout, const CALLBACK &callback) : _loop(loop), _callback(callback)
     {
         // store pointer to current object
         _watcher.data = this;
@@ -100,13 +100,13 @@ public:
      *  No copying or moving allowed
      *  @param  that
      */
-    Timer(const Timer &that) = delete;
-    Timer(Timer &&that) = delete;
+    TimeoutWatcher(const TimeoutWatcher &that) = delete;
+    TimeoutWatcher(TimeoutWatcher &&that) = delete;
 
     /**
      *  Destructor
      */
-    virtual ~Timer() 
+    virtual ~TimeoutWatcher() 
     {
         // cancel the timer
         cancel();
@@ -116,8 +116,8 @@ public:
      *  No copying or moving
      *  @param  that
      */
-    Timer &operator=(const Timer &that) = delete;
-    Timer &operator=(Timer &&that) = delete;
+    TimeoutWatcher &operator=(const TimeoutWatcher &that) = delete;
+    TimeoutWatcher &operator=(TimeoutWatcher &&that) = delete;
     
     /**
      *  Start the timer

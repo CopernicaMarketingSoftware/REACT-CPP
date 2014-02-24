@@ -48,7 +48,7 @@ int main()
         reader->cancel();
         
         // stop the application in one second
-        loop.onTimeout(1.0, [](React::Timer *timer) {
+        loop.onTimeout(1.0, [](React::TimeoutWatcher *timer) {
         
             // exit the application
             exit(0);

@@ -1,5 +1,5 @@
 /**
- *  Synchronizer.h
+ *  Synchronize.h
  *
  *  Object that can be used to synchroninze an event loop.
  *
@@ -14,7 +14,7 @@ namespace React {
 /**
  *  Class definition
  */
-class Synchronizer : private Watcher
+class SynchronizeWatcher : private Watcher
 {
 private:
     /**
@@ -62,7 +62,7 @@ public:
      *  @param  callback    Function that is called when synchronizer is activated
      */
     template <typename CALLBACK>
-    Synchronizer(Loop *loop, const CALLBACK &callback) :
+    SynchronizeWatcher(Loop *loop, const CALLBACK &callback) :
         _loop(loop), _callback(callback)
     {
         // store pointer to current object
@@ -79,13 +79,13 @@ public:
      *  No copying or moving allowed
      *  @param  that
      */
-    Synchronizer(const Synchronizer &that) = delete;
-    Synchronizer(Synchronizer &&that) = delete;
+    SynchronizeWatcher(const SynchronizeWatcher &that) = delete;
+    SynchronizeWatcher(SynchronizeWatcher &&that) = delete;
     
     /**
      *  Destructor
      */
-    virtual ~Synchronizer() 
+    virtual ~SynchronizeWatcher() 
     {
         // destructor
         cancel();
@@ -95,8 +95,8 @@ public:
      *  No copying or moving
      *  @param  that
      */
-    Synchronizer &operator=(const Synchronizer &that) = delete;
-    Synchronizer &operator=(Synchronizer &&that) = delete;
+    SynchronizeWatcher &operator=(const SynchronizeWatcher &that) = delete;
+    SynchronizeWatcher &operator=(SynchronizeWatcher &&that) = delete;
     
     /**
      *  Synchronize with the event loop

@@ -29,7 +29,7 @@ static void onSignal(struct ev_loop *loop, ev_signal *watcher, int revents)
  *  Initialize the object
  *  @param  signum
  */
-void Signal::initialize(int signum)
+void SignalWatcher::initialize(int signum)
 {
     // initialize the signal watcher
     ev_signal_init(&_watcher, onSignal, signum);

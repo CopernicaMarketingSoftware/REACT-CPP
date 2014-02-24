@@ -16,10 +16,10 @@ namespace React {
  *  @param  callback    Function that is called the moment the fd is readable
  *  @return             Object that can be used to stop checking for readability
  */
-std::shared_ptr<Reader> Loop::onReadable(int fd, const ReadCallback &callback)
+std::shared_ptr<ReadWatcher> Loop::onReadable(int fd, const ReadCallback &callback)
 {
     // create self-destructing implementation object
-    auto *reader = new SharedReader(this, fd, callback);
+    auto *reader = new SharedReadWatcher(this, fd, callback);
     
     // done
     return reader->pointer();
@@ -31,10 +31,10 @@ std::shared_ptr<Reader> Loop::onReadable(int fd, const ReadCallback &callback)
  *  @param  callback    Function that is called the moment the fd is readable
  *  @return             Object that can be used to stop checking for writability
  */
-std::shared_ptr<Writer> Loop::onWritable(int fd, const WriteCallback &callback)
+std::shared_ptr<WriteWatcher> Loop::onWritable(int fd, const WriteCallback &callback)
 {
     // create self-destructing implementation object
-    auto *writer = new SharedWriter(this, fd, callback);
+    auto *writer = new SharedWriteWatcher(this, fd, callback);
     
     // done
     return writer->pointer();
@@ -46,10 +46,10 @@ std::shared_ptr<Writer> Loop::onWritable(int fd, const WriteCallback &callback)
  *  @param  callback    Function that is called when the timer expires
  *  @return             Object that can be used to stop or edit the timer
  */
-std::shared_ptr<Timer> Loop::onTimeout(Timestamp timeout, const TimerCallback &callback)
+std::shared_ptr<TimeoutWatcher> Loop::onTimeout(Timestamp timeout, const TimeoutCallback &callback)
 {
     // create self-destructing implementation object
-    auto *timer = new SharedTimer(this, timeout, callback);
+    auto *timer = new SharedTimeoutWatcher(this, timeout, callback);
     
     // done
     return timer->pointer();
@@ -62,10 +62,10 @@ std::shared_ptr<Timer> Loop::onTimeout(Timestamp timeout, const TimerCallback &c
  *  @param  callback    Function that is called when the timer expires
  *  @return             Object that can be used to stop or edit the interval
  */
-std::shared_ptr<Interval> Loop::onInterval(Timestamp initial, Timestamp timeout, const IntervalCallback &callback)
+std::shared_ptr<IntervalWatcher> Loop::onInterval(Timestamp initial, Timestamp timeout, const IntervalCallback &callback)
 {
     // create self-destructing implementation object
-    auto *interval = new SharedInterval(this, initial, timeout, callback);
+    auto *interval = new SharedIntervalWatcher(this, initial, timeout, callback);
     
     // done
     return interval->pointer();
@@ -76,13 +76,13 @@ std::shared_ptr<Interval> Loop::onInterval(Timestamp initial, Timestamp timeout,
  *  @param  callback    The callback that is called 
  *  @return             Object that can be used to stop watching, or to synchronize
  */
-std::shared_ptr<Synchronizer> Loop::onSynchronize(const SynchronizeCallback &callback)
+std::shared_ptr<SynchronizeWatcher> Loop::onSynchronize(const SynchronizeCallback &callback)
 {
     // create implementation object
-    auto *synchronizer = new Synchronizer(this, callback);
+    auto *synchronizer = new SynchronizeWatcher(this, callback);
     
     // done, wrap in a shared pointer
-    return std::shared_ptr<Synchronizer>(synchronizer);
+    return std::shared_ptr<SynchronizeWatcher>(synchronizer);
 }
 
 /**

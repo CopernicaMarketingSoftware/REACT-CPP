@@ -14,23 +14,25 @@ namespace React {
 /**
  *  Forward declarations
  */
-class Reader;
-class Writer;
-class Timer;
-class Interval;
-class Synchronizer;
-class Signal;
+class ReadWatcher;
+class WriteWatcher;
+class TimeoutWatcher;
+class IntervalWatcher;
+class SynchronizeWatcher;
+class SignalWatcher;
+class StatusWatcher;
 
 /**
  *  Timestamp type is a wrapper around libev
  */
 using Timestamp = ev_tstamp;
-using ReadCallback = Callback<Reader>;
-using WriteCallback = Callback<Writer>;
-using TimerCallback = Callback<Timer>;
-using IntervalCallback = Callback<Interval>;
-using SynchronizeCallback = Callback<Synchronizer>;
-using SignalCallback = Callback<Signal>;
+using ReadCallback = Callback<ReadWatcher>;
+using WriteCallback = Callback<WriteWatcher>;
+using TimeoutCallback = Callback<TimeoutWatcher>;
+using IntervalCallback = Callback<IntervalWatcher>;
+using SynchronizeCallback = Callback<SynchronizeWatcher>;
+using SignalCallback = Callback<SignalWatcher>;
+using StatusCallback = Callback<StatusWatcher>;
 
 /**
  *  End namespace

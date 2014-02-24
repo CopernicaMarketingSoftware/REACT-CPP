@@ -23,12 +23,13 @@
 #include <reactcpp/loop.h>
 #include <reactcpp/mainloop.h>
 #include <reactcpp/watcher.h>
-#include <reactcpp/reader.h>
-#include <reactcpp/writer.h>
-#include <reactcpp/signal.h>
-#include <reactcpp/synchronizer.h>
-#include <reactcpp/timer.h>
-#include <reactcpp/interval.h>
+#include <reactcpp/watchers/read.h>
+#include <reactcpp/watchers/write.h>
+#include <reactcpp/watchers/signal.h>
+#include <reactcpp/watchers/synchronize.h>
+#include <reactcpp/watchers/timeout.h>
+#include <reactcpp/watchers/interval.h>
+#include <reactcpp/watchers/status.h>
 
 /**
  *  End if

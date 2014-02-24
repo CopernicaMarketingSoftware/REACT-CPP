@@ -15,7 +15,7 @@ namespace React {
 /**
  *  Class definition
  */
-class SharedInterval : public Shared<Interval>, public Interval
+class SharedIntervalWatcher : public Shared<IntervalWatcher>, public IntervalWatcher
 {
 private:
     /**
@@ -29,7 +29,7 @@ private:
         auto ptr = pointer();
         
         // now we call the base invoke method
-        Interval::invoke();
+        IntervalWatcher::invoke();
     }
 
 public:
@@ -40,12 +40,12 @@ public:
      *  @param  interval
      *  @param  callback
      */
-    SharedInterval(Loop *loop, Timestamp initial, Timestamp interval, const IntervalCallback &callback) : Shared(this), Interval(loop, initial, interval, callback) {}
+    SharedIntervalWatcher(Loop *loop, Timestamp initial, Timestamp interval, const IntervalCallback &callback) : Shared(this), IntervalWatcher(loop, initial, interval, callback) {}
     
     /**
      *  Destructor
      */
-    virtual ~SharedInterval() {}
+    virtual ~SharedIntervalWatcher() {}
     
     /**
      *  Start the timer
@@ -54,7 +54,7 @@ public:
     virtual bool start() override
     {
         // call base
-        if (!Interval::start()) return false;
+        if (!IntervalWatcher::start()) return false;
         
         // make sure the shared pointer is valid, so that we have a reference to ourselves
         restore();
@@ -70,7 +70,7 @@ public:
     virtual bool cancel() override
     {
         // call base
-        if (!Interval::cancel()) return false;
+        if (!IntervalWatcher::cancel()) return false;
         
         // because the interval is no longer running, we no longer have to keep a pointer to ourselves
         reset();

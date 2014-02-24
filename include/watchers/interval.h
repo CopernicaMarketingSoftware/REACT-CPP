@@ -14,7 +14,7 @@ namespace React {
 /**
  *  Class definition
  */
-class Interval : private Watcher
+class IntervalWatcher : private Watcher
 {
 private:
     /**
@@ -67,7 +67,7 @@ public:
      *  @param  callback    Function that is called when timer is expired
      */
     template <typename CALLBACK>
-    Interval(Loop *loop, Timestamp initial, Timestamp interval, const CALLBACK &callback) :
+    IntervalWatcher(Loop *loop, Timestamp initial, Timestamp interval, const CALLBACK &callback) :
         _loop(loop), _callback(callback)
     {
         // store pointer to current object
@@ -87,19 +87,19 @@ public:
      *  @param  callback    Function that is called when timer is expired
      */
     template <typename CALLBACK>
-    Interval(Loop *loop, Timestamp interval, const CALLBACK &callback) : Interval(loop, interval, interval, callback) {}
+    IntervalWatcher(Loop *loop, Timestamp interval, const CALLBACK &callback) : IntervalWatcher(loop, interval, interval, callback) {}
 
     /**
      *  No copying or moving allowed
      *  @param  that
      */
-    Interval(const Interval &that) = delete;
-    Interval(Interval &&that) = delete;
+    IntervalWatcher(const IntervalWatcher &that) = delete;
+    IntervalWatcher(IntervalWatcher &&that) = delete;
 
     /**
      *  Destructor
      */
-    virtual ~Interval() 
+    virtual ~IntervalWatcher() 
     {
         // cancel the timer
         cancel();
@@ -109,8 +109,8 @@ public:
      *  No copying or moving
      *  @param  that
      */
-    Interval &operator=(const Interval &that) = delete;
-    Interval &operator=(Interval &&that) = delete;
+    IntervalWatcher &operator=(const IntervalWatcher &that) = delete;
+    IntervalWatcher &operator=(IntervalWatcher &&that) = delete;
     
     /**
      *  Start the timer

@@ -1,5 +1,5 @@
 /**
- *  Timer.cpp
+ *  Interval.cpp
  * 
  *  @copyright 2014 Copernica BV
  */
@@ -27,17 +27,14 @@ static void onExpired(struct ev_loop *loop, ev_timer *watcher, int revents)
     
 /**
  *  Initialize the object
+ *  @param  initial
  *  @param  timeout
  */
-void Timer::initialize(Timestamp timeout)
+void IntervalWatcher::initialize(Timestamp initial, Timestamp timeout)
 {
-    // set the expiration time
-    _expire = _loop->now() + timeout;
-    
     // initialize the timer
-    ev_timer_init(&_watcher, onExpired, timeout, 0.0);
+    ev_timer_init(&_watcher, onExpired, initial, timeout);
 }
-
 
 /**
  *  End namespace
