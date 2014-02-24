@@ -17,7 +17,8 @@ namespace React {
  *  Construct the thread worker
  */
 ThreadWorkerImpl::ThreadWorkerImpl() :
-    _thread(&ThreadWorkerImpl::run, this)
+    _thread(&ThreadWorkerImpl::run, this),
+    _running(true)
 {}
 
 /**
