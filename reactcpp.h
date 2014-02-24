@@ -22,6 +22,7 @@
 #include <reactcpp/types.h>
 #include <reactcpp/loop.h>
 #include <reactcpp/mainloop.h>
+#include <reactcpp/worker.h>
 #include <reactcpp/watcher.h>
 #include <reactcpp/watchers/read.h>
 #include <reactcpp/watchers/write.h>

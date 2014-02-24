@@ -1,7 +1,7 @@
 /**
  *  Loop.h
  *
- *  Central event loop class 
+ *  Central event loop class
  *
  *  @copyright 2014 Copernica BV
  */
@@ -22,38 +22,38 @@ private:
      *  @var    struct ev_loop
      */
     struct ev_loop *_loop = nullptr;
-    
+
     /**
      *  Is the loop already running?
      *  @var    bool
      */
     bool _running = false;
 
-    
+
 protected:
     /**
      *  Protected constructor to wrap around an already allocated loop
      *  @var    struct ev_loop
      */
     Loop(struct ev_loop *loop) : _loop(loop) {}
-    
+
 public:
     /**
      *  Constructor
      */
     Loop() : _loop(ev_loop_new(EVFLAG_AUTO)) {}
-    
+
     /**
      *  Destructor
      */
     virtual ~Loop() { ev_loop_destroy(_loop); }
-    
+
     /**
      *  Casting operator to cast the loop object to the internal libev
      *  loop structure. This makes it possible to pass the loop object
      *  directly to libev functions (but use this with care, as it might
      *  result in a conflicting state of the loop object in C++ and C code).
-     * 
+     *
      *  @return struct ev_loop
      */
     operator struct ev_loop * ()
@@ -63,33 +63,33 @@ public:
 
     /**
      *  Current loop time
-     * 
-     *  With every iteration of the loop, the current time is retrieved and 
+     *
+     *  With every iteration of the loop, the current time is retrieved and
      *  stored. With the method now() you can retrieve this time. By using this
      *  method instead of doing a system call yourself to find out the time,
      *  you save a loop of system calls, and increase performance.
-     * 
+     *
      *  @return Timestamp;
      */
-    Timestamp now() 
+    Timestamp now()
     {
-        return ev_now(_loop); 
+        return ev_now(_loop);
     }
-    
+
     /**
      *  Run the event loop
-     * 
+     *
      *  This will run the event loop, until no more timers and filedescriptors
      *  are linked to it. If you call this method before you have registered
      *  any timers or filedescriptors, it will therefore immediately return.
-     * 
+     *
      *  @return bool
      */
     bool run()
     {
         // not possible if already running
         if (_running) return false;
-        
+
 #if EV_VERSION_MAJOR == 3
         // start running for old libev library version
         ev_loop(_loop, 0);
@@ -101,26 +101,26 @@ public:
         // done
         return _running = true;
     }
-    
+
     /**
      *  Run a single iteration of the event loop
-     * 
+     *
      *  This will check once all the filedescriptors and timers, and will notify
      *  the appropriate callbacks.
-     * 
+     *
      *  With the boolean parameter you can specify if the operation should block
      *  or not. If you set it to true, the method will wait until at least one
      *  callback can be called. If set to false, it will now wait and immediately
      *  return if no methods can be called
-     * 
-     *  @param  block       
+     *
+     *  @param  block
      *  @return bool
      */
     bool step(bool block = true)
     {
         // not possible when already running
         if (_running) return false;
-        
+
 #if EV_VERSION_MAJOR == 3
         // old version
         ev_loop(_loop, EVLOOP_ONESHOT + (block ? 0 : EVRUN_NOWAIT));
@@ -135,16 +135,17 @@ public:
 
     /**
      *  Stop running the event loop
-     * 
-     *  Normally, the event loop runs until no more filedescriptors and tim
-     * 
+     *
+     *  Normally, the event loop runs until no more filedescriptors and timers
+     *  are active. This function will terminate the event loop prematurely.
+     *
      *  @return bool
      */
     bool stop()
     {
         // must be running
         if (!_running) return false;
-        
+
 #if EV_VERSION_MAJOR == 3
         // old version
         ev_unloop(_loop, EVUNLOOP_ONE);
@@ -161,7 +162,7 @@ public:
 
     /**
      *  Suspend the loop. While the loop is suspended, timers will not be processed,
-     *  and the time for the timers does not proceed. Once the loop is resumed, the 
+     *  and the time for the timers does not proceed. Once the loop is resumed, the
      *  timers continue to run.
      */
     void suspend()
@@ -169,7 +170,7 @@ public:
         // suspend now
         ev_suspend(_loop);
     }
-    
+
     /**
      *  Resume the loop after it was suspended
      */
@@ -180,16 +181,16 @@ public:
 
     /**
      *  Register a function that is called the moment a filedescriptor becomes
-     *  readable. 
+     *  readable.
      *
      *  This method takes two arguments: the filedescriptor to be checked and
      *  the function that is going to be called the moment the filedescriptor
      *  becomes readable.
      *
      *  The method returns a shared pointer to a watcher object. This watcher
-     *  object can be used to later stop watching the filedescriptor. It is 
+     *  object can be used to later stop watching the filedescriptor. It is
      *  legal to ignore the return value if you don't need it.
-     * 
+     *
      *  @param  fd          The filedescriptor
      *  @param  callback    Function that is called the moment the fd is readable
      *  @return             Object that can be used to stop checking for readability
@@ -208,15 +209,15 @@ public:
     /**
      *  Register a function that is called the moment a filedescriptor becomes
      *  writable.
-     * 
+     *
      *  This method takes two arguments: the filedescriptor to be checked and
      *  the function that is going to be called the moment the filedescriptor
      *  becomes writable.
      *
      *  The method returns a shared pointer to a watcher object. This watcher
-     *  object can be used to later stop watching the filedescriptor. It is 
+     *  object can be used to later stop watching the filedescriptor. It is
      *  legal to ignore the return value if you don't need it.
-     * 
+     *
      *  @param  fd          The filedescriptor
      *  @param  callback    Function that is called the moment the fd is readable
      *  @return             Object that can be used to stop checking for writability
@@ -231,24 +232,24 @@ public:
      */
     template <typename CALLBACK>
     std::shared_ptr<WriteWatcher> onWritable(int fd, const CALLBACK &callback) { return onWritable(fd, WriteCallback(callback)); }
-    
+
     /**
      *  Register a timeout to be called in a certain amount of time
-     * 
+     *
      *  This method takes two arguments: a timeout in seconds that specifies
      *  for how long you'd like to wait, and a callback function that will be
      *  called when the timer expires.
      *
      *  The method returns a shared pointer to a watcher object. This watcher
      *  object can be used to stop the timer. If you ignore the return value
-     *  (which is legal) you can not stop the timer. 
-     * 
+     *  (which is legal) you can not stop the timer.
+     *
      *  @param  timeout     The timeout in seconds
      *  @param  callback    Function that is called when the timer expires
      *  @return             Object that can be used to stop or edit the timer
      */
     std::shared_ptr<TimeoutWatcher> onTimeout(Timestamp timeout, const TimeoutCallback &callback);
-    
+
     /**
      *  Alternative onTimeout() function that accepts a range of other callback types
      *  @param  timeout     The timeout in seconds
@@ -257,18 +258,18 @@ public:
      */
     template <typename CALLBACK>
     std::shared_ptr<TimeoutWatcher> onTimeout(Timestamp timeout, const CALLBACK &callback) { return onTimeout(timeout, TimeoutCallback(callback)); }
-    
+
     /**
      *  Register a function to be called periodically at fixed intervals
-     * 
+     *
      *  This method takes two arguments: a timeout in seconds that specifies
-     *  the interval time, and a callback function that will be called 
+     *  the interval time, and a callback function that will be called
      *  every time the interval timer expires.
      *
      *  The method returns a shared pointer to a watcher object. This watcher
      *  object can be used to stop the timer. If you ignore the return value
      *  (which is legal) you can not stop the it.
-     * 
+     *
      *  @param  initial     Initial timeout in seconds
      *  @param  timeout     Subsequent interval in seconds
      *  @param  callback    Function that is called when the timer expires
@@ -287,26 +288,26 @@ public:
     std::shared_ptr<IntervalWatcher> onInterval(Timestamp initial, Timestamp timeout, const CALLBACK &callback) { return onInterval(initial, timeout, IntervalCallback(callback)); }
     template <typename CALLBACK>
     std::shared_ptr<IntervalWatcher> onInterval(Timestamp timeout, const IntervalCallback &callback) { return onInterval(timeout, timeout, IntervalCallback(callback)); }
-    
+
     /**
      *  Register a synchronize function
-     * 
+     *
      *  In a multi threaded environment, you may have multiple threads that you
-     *  sometimes want to synchronize. With the onSychronize() method you can 
-     *  register a function that is going to be called when the thread is 
+     *  sometimes want to synchronize. With the onSychronize() method you can
+     *  register a function that is going to be called when the thread is
      *  synchronized from a different thread.
-     * 
+     *
      *  This method returns a thread safe watcher object that need to wakeup
      *  the event loop from an other thread.
-     * 
-     *  @param  callback    The callback that is called 
+     *
+     *  @param  callback    The callback that is called
      *  @return             Object that can be used to stop watching, or to synchronize
      */
     std::shared_ptr<SynchronizeWatcher> onSynchronize(const SynchronizeCallback &callback);
 
     /**
      *  Alternative onSynchronize method that accepts other callbacks
-     *  @param  callback    The callback that is called 
+     *  @param  callback    The callback that is called
      *  @return             Object that can be used to stop watching, or to synchronize
      */
     template <typename CALLBACK>

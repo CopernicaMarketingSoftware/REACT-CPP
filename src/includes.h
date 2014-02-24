@@ -9,6 +9,10 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <deque>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 #include "../include/callback.h"
 #include "../include/types.h"
 #include "../include/loop.h"
@@ -21,6 +25,10 @@
 #include "../include/watchers/synchronize.h"
 #include "../include/watchers/signal.h"
 #include "../include/watchers/status.h"
+#include "../include/worker.h"
+#include "workerimpl.h"
+#include "loopworkerimpl.h"
+#include "threadworkerimpl.h"
 #include "shared.h"
 #include "shared/read.h"
 #include "shared/write.h"
