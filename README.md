@@ -349,7 +349,7 @@ only once, an interval on the other hand calls the registered callback method
 every time the interval time has expired.
 
 When you create an interval, you can specify both the initial expire time as
-well as the interval between all subsequent calls. If you ommit the initial time,
+well as the interval between all subsequent calls. If you omit the initial time,
 the callback will be first called after the first interval has passed.
 
 ````c++
@@ -448,7 +448,7 @@ int main()
     // create a thread loop
     React::MainLoop loop;
     
-    // install an callback that can be called by a worker thread.
+    // install a callback that can be called by a worker thread.
     // the returned synchronizer object is of type std::shared_ptr<Synchronizer>, 
     // and contains a thread safe object that can be accessed from other threads 
     // to notify us
