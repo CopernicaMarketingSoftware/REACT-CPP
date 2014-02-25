@@ -39,6 +39,7 @@ public:
         if (!_socket.listen()) throw Exception(strerror(errno));
         
         // install handler when readable
+        // @todo uninstall handler when closed
         _socket.onReadable(callback);
     }
 

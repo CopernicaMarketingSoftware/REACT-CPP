@@ -35,7 +35,7 @@ private:
      *  @param  port        Port to bind to
      *  @return bool
      */
-    bool bind(const Net::Ipv4 &ip, uint16_t port = 0)
+    bool bind(const Net::Ipv4 &ip, uint16_t port)
     {
         // structure to initialize
         struct sockaddr_in info;
@@ -57,7 +57,7 @@ private:
      *  @param  port        Port to bind to
      *  @return bool
      */
-    bool bind(const Net::Ipv6 &ip, uint16_t port = 0)
+    bool bind(const Net::Ipv6 &ip, uint16_t port)
     {
         // structure to initialize
         struct sockaddr_in6 info;
@@ -81,7 +81,7 @@ private:
      *  @param  port        Port to bind to
      *  @return bool
      */
-    bool bind(const Net::Ip &ip, uint16_t port = 0)
+    bool bind(const Net::Ip &ip, uint16_t port)
     {
         switch (ip.version()) {
         case 4: return bind(ip.v4(), port);

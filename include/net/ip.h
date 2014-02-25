@@ -64,6 +64,24 @@ public:
     Ip(const Ip &ip) : _version(ip._version), _ip(ip) {}
 
     /**
+     *  Constructor based on string
+     *  @param  ip
+     */
+    Ip(const char *ip) : Ip(Ipv4(ip))
+    {
+        // if IP is already valid, we use that
+        if (valid()) return;
+        
+        // try parsing as Ipv6
+        Ipv6 v6(ip);
+        if (!v6.valid()) return;
+        
+        // use this address
+        _version = 6;
+        _ip.v6 = v6;
+    }
+
+    /**
      *  Destructor
      */
     virtual ~Ip() {}
@@ -98,6 +116,20 @@ public:
     char version() const
     {
         return _version;
+    }
+    
+    /**
+     *  Is this a valid IP?
+     *  @return bool
+     */
+    bool valid() const
+    {
+        // check version
+        switch (_version) {
+        case 4: return _ip.v4.valid();
+        case 6: return _ip.v6.valid();
+        default:return false;
+        }
     }
     
     /**
