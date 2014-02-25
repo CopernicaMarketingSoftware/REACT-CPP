@@ -15,6 +15,7 @@
 #include <ares.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <unistd.h>
 
 /**
  *  C++ dependencies
@@ -26,6 +27,7 @@
 /**
  *  Other include files
  */
+#include <reactcpp/exception.h>
 #include <reactcpp/callback.h>
 #include <reactcpp/types.h>
 #include <reactcpp/loop.h>
@@ -42,10 +44,16 @@
 #include <reactcpp/net/ipv4.h>
 #include <reactcpp/net/ipv6.h>
 #include <reactcpp/net/ip.h>
+#include <reactcpp/net/address.h>
 #include <reactcpp/dns/iprecord.h>
 #include <reactcpp/dns/types.h>
 #include <reactcpp/dns/base.h>
 #include <reactcpp/dns/resolver.h>
+#include <reactcpp/tcp/exception.h>
+#include <reactcpp/tcp/types.h>
+#include <reactcpp/tcp/socket.h>
+#include <reactcpp/tcp/socketaddress.h>
+#include <reactcpp/tcp/server.h>
 
 /**
  *  End if

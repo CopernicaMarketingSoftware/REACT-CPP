@@ -90,6 +90,33 @@ public:
         // done
         return *this;
     }
+    
+    /**
+     *  IP version
+     *  @return char
+     */
+    char version() const
+    {
+        return _version;
+    }
+    
+    /**
+     *  Retrieve the IPv4 version
+     *  @return Ipv4
+     */
+    const Ipv4 &v4() const
+    {
+        return _ip.v4;
+    }
+
+    /**
+     *  Retrieve the IPv6 version
+     *  @return Ipv6
+     */
+    const Ipv6 &v6() const
+    {
+        return _ip.v6;
+    }
 
     /**
      *  Convert the object to a string
