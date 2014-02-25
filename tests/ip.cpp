@@ -1,11 +1,4 @@
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <string.h>
 #include <reactcpp.h>
-#include <reactcpp/net/ipv4.h>
-#include <reactcpp/net/ipv6.h>
-#include <reactcpp/net/ip.h>
 #include <iostream>
 
 int main()

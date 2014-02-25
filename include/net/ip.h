@@ -67,8 +67,135 @@ public:
      *  Destructor
      */
     virtual ~Ip() {}
+  
+    /**
+     *  Assign a different IP
+     *  @param  that
+     *  @return IP
+     */
+    Ip &operator=(const Ip &that)
+    {
+        // skip self assignment
+        if (this == &that) return *this;
+        
+        // copy version
+        _version = that._version;
+        
+        // check version
+        switch (_version) {
+        case 4: _ip.v4 = that._ip.v4; break;
+        case 6: _ip.v6 = that._ip.v6; break;
+        }
+        
+        // done
+        return *this;
+    }
+
+    /**
+     *  Convert the object to a string
+     *  @return string
+     */
+    const std::string toString() const
+    {
+        switch (_version) {
+        case 4: return _ip.v4.toString();
+        case 6: return _ip.v6.toString();
+        default:return std::string();
+        }
+    }
+  
+    /**
+     *  Comparison of two ips
+     *  @param  that
+     *  @return bool
+     */
+    bool operator==(const Ip &that) const
+    {
+        // versions must be equal
+        if (_version != that._version) return false;
+        
+        // compare on version
+        switch (_version) {
+        case 4: return _ip.v4 == that._ip.v4;
+        case 6: return _ip.v6 == that._ip.v6;
+        
+        // all ips of a different version are considered equal
+        default:return true;
+        }
+    }
     
+    /**
+     *  Comparison of two ips
+     *  @param  that
+     *  @return bool
+     */
+    bool operator!=(const Ip &that) const
+    {
+        // versions must not be equal
+        if (_version == that._version) return true;
+        
+        // compare on version
+        switch (_version) {
+        case 4: return _ip.v4 != that._ip.v4;
+        case 6: return _ip.v6 != that._ip.v6;
+
+        // all ips of a different version are considered equal
+        default:return false;
+        }
+    }
+    
+    /**
+     *  Comparison of two ips
+     *  @param  that
+     *  @return bool
+     */
+    bool operator<(const Ip &that) const
+    {
+        // versions must be equal
+        if (_version != that._version) return _version < that._version;
+        
+        // compare on version
+        switch (_version) {
+        case 4: return _ip.v4 < that._ip.v4;
+        case 6: return _ip.v6 < that._ip.v6;
+
+        // all ips of a different version are considered equal
+        default:return false;
+        }
+    }
+
+    /**
+     *  Comparison of two ips
+     *  @param  that
+     *  @return bool
+     */
+    bool operator>(const Ip &that) const
+    {
+        // versions must be equal
+        if (_version != that._version) return _version > that._version;
+        
+        // compare on version
+        switch (_version) {
+        case 4: return _ip.v4 > that._ip.v4;
+        case 6: return _ip.v6 > that._ip.v6;
+
+        // all ips of a different version are considered equal
+        default:return false;
+        }
+    }
 };
+
+/**
+ *  Function to write an IP to a stream
+ *  @param  os
+ *  @param  ip
+ *  @return ostream
+ */
+inline std::ostream &operator<<(std::ostream &os, const Ip &ip)
+{
+    os << ip.toString();
+    return os;
+}
 
 /**
  *  End namespace

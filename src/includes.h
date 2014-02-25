@@ -6,6 +6,10 @@
  *  @copyright 2014 Copernica BV
  */
 #include <ev.h>
+#include <arpa/nameser.h>
+#include <arpa/inet.h>
+#include <ares.h>
+#include <string.h>
 #include <memory>
 #include <map>
 #include <set>
@@ -18,6 +22,7 @@
 #include "../include/loop.h"
 #include "../include/mainloop.h"
 #include "../include/watcher.h"
+#include "../include/timeval.h"
 #include "../include/watchers/read.h"
 #include "../include/watchers/write.h"
 #include "../include/watchers/timeout.h"
@@ -26,6 +31,13 @@
 #include "../include/watchers/signal.h"
 #include "../include/watchers/status.h"
 #include "../include/worker.h"
+#include "../include/net/ipv4.h"
+#include "../include/net/ipv6.h"
+#include "../include/net/ip.h"
+#include "../include/dns/iprecord.h"
+#include "../include/dns/types.h"
+#include "../include/dns/base.h"
+#include "../include/dns/resolver.h"
 #include "workerimpl.h"
 #include "loopworkerimpl.h"
 #include "threadworkerimpl.h"
@@ -36,3 +48,8 @@
 #include "shared/interval.h"
 #include "shared/signal.h"
 #include "shared/status.h"
+#include "dns/request.h"
+#include "dns/ipsrequest.h"
+#include "dns/ipv4result.h"
+#include "dns/ipv6result.h"
+#include "dns/allipsresult.h"

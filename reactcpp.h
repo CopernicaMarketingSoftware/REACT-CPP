@@ -9,11 +9,19 @@
 #define REACTCPP_H
 
 /**
- *  Dependencies
+ *  C dependencies
  */
 #include <ev.h>
+#include <ares.h>
+#include <arpa/inet.h>
+#include <string.h>
+
+/**
+ *  C++ dependencies
+ */
 #include <memory>
 #include <set>
+#include <map>
 
 /**
  *  Other include files
@@ -31,6 +39,13 @@
 #include <reactcpp/watchers/timeout.h>
 #include <reactcpp/watchers/interval.h>
 #include <reactcpp/watchers/status.h>
+#include <reactcpp/net/ipv4.h>
+#include <reactcpp/net/ipv6.h>
+#include <reactcpp/net/ip.h>
+#include <reactcpp/dns/iprecord.h>
+#include <reactcpp/dns/types.h>
+#include <reactcpp/dns/base.h>
+#include <reactcpp/dns/resolver.h>
 
 /**
  *  End if

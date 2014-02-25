@@ -100,6 +100,26 @@ public:
     }
     
     /**
+     *  Constructor based on ares ipv6 structure
+     *  @param  ip      ares_in6_addr storage
+     */
+    Ipv6(const struct ares_in6_addr ip)
+    {
+        // copy address just as if it was an in6_addr
+        memcpy(&_addr, &ip, sizeof(struct in6_addr));
+    }
+    
+    /**
+     *  Constructor based on ares ipv6 structure
+     *  @param  ip      ares_in6_addr storage
+     */
+    Ipv6(const struct ares_in6_addr *ip)
+    {
+        // copy address just as if it was an in6_addr
+        memcpy(&_addr, ip, sizeof(struct in6_addr));
+    }
+    
+    /**
      *  Destructor
      */
     virtual ~Ipv6() {}
