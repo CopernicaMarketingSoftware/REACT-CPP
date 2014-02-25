@@ -19,50 +19,112 @@ class ThreadWorkerImpl : public WorkerImpl
 private:
     /**
      *  The thread we run
+     *  @var    std::thread
      */
     std::thread _thread;
 
     /**
      *  Are we still running?
+     *  @var    bool
      */
-    bool _running;
+    bool _running = true;
 
     /**
      *  The callbacks to execute from the main thread
+     *  @var    std::deque
      */
     std::deque<std::function<void()>> _callbacks;
 
     /**
      *  Mutex to protect the callback list
+     *  @var    std::mutex
      */
     std::mutex _mutex;
 
     /**
      *  Condition to signal arrival of new work
+     *  @var    std::condition_variable
      */
     std::condition_variable _condition;
 
     /**
      *  Callback function that is executed from the loop context
      */
-    void run();
+    void run()
+    {
+        // keep going until we are signalled to stop
+        while (true)
+        {
+            // lock the callback list
+            std::unique_lock<std::mutex> lock(_mutex);
+
+            // wait for new work to arrive or the worker to be shutdown
+            while (_callbacks.empty() && _running) _condition.wait(lock);
+
+            // are we no longer supposed to be running?
+            if (!_running) return;
+
+            // retrieve the callback
+            auto callback = std::move(_callbacks.front());
+            
+            // remove from the queue
+            _callbacks.pop_front();
+
+            // release the lock
+            lock.unlock();
+
+            // run the callback
+            callback();
+        }
+    }
+
 public:
     /**
      *  Construct the thread worker
      */
-    ThreadWorkerImpl();
+    ThreadWorkerImpl() : _thread(&ThreadWorkerImpl::run, this) {}
 
     /**
      *  Clean up the workers
      */
-    virtual ~ThreadWorkerImpl();
+    virtual ~ThreadWorkerImpl()
+    {
+        // lock the mutex
+        _mutex.lock();
+
+        // we should no longer be running
+        _running = false;
+
+        // unlock the mutex
+        _mutex.unlock();
+
+        // signal thread to stop running
+        _condition.notify_one();
+
+        // and join the thread
+        _thread.join();
+    }
 
     /**
      *  Execute a function
      *
      *  @param  function    the code to execute
      */
-    virtual void execute(const std::function<void()> &callback);
+    virtual void execute(const std::function<void()> &callback) override
+    {
+        // lock mutex
+        _mutex.lock();
+
+        // push the callback onto the list
+        _callbacks.push_back(callback);
+
+        // unlock mutex
+        _mutex.unlock();
+
+        // signal the worker thread to pick up the work
+        _condition.notify_one();
+    }
+
 };
 
 /**

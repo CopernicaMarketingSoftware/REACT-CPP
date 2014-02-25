@@ -17,7 +17,9 @@
  */
 namespace React {
 
-// forward declaration
+/**
+ *  Forward declaration
+ */
 class WorkerImpl;
 
 /**
@@ -28,8 +30,10 @@ class Worker
 private:
     /**
      *  The underlying worker implementation
+     *  @var    WorkerImpl
      */
     WorkerImpl *_impl;
+
 public:
     /**
      *  Constructor
