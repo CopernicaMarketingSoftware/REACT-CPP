@@ -58,13 +58,13 @@ public:
      *  Constructor
      *  @param  socket  The socket
      */
-    SocketAddress(const Socket &socket) : SocketAddress(socket.internal()) {}
+    SocketAddress(const Socket &socket) : SocketAddress(socket.fd()) {}
     
     /**
      *  Constructor
      *  @param  socket  The socket
      */
-    SocketAddress(const Socket *socket) : SocketAddress(socket->internal()) {}
+    SocketAddress(const Socket *socket) : SocketAddress(socket->fd()) {}
     
     /**
      *  Destructor

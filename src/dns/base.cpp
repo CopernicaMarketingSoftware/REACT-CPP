@@ -5,8 +5,6 @@
  */
 #include "includes.h"
 
-#include <iostream>
-
 /**
  *  Set up namespace
  */

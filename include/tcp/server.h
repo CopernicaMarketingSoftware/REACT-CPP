@@ -22,6 +22,11 @@ private:
      *  @var    Socket
      */
     Socket _socket;
+
+    /**
+     *  The Connection class is a friend
+     */
+    friend class Connection;
     
 public:
     /**

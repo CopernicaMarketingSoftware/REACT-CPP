@@ -41,6 +41,7 @@
 #include <reactcpp/watchers/timeout.h>
 #include <reactcpp/watchers/interval.h>
 #include <reactcpp/watchers/status.h>
+#include <reactcpp/fd.h>
 #include <reactcpp/net/ipv4.h>
 #include <reactcpp/net/ipv6.h>
 #include <reactcpp/net/ip.h>
@@ -54,6 +55,7 @@
 #include <reactcpp/tcp/socket.h>
 #include <reactcpp/tcp/socketaddress.h>
 #include <reactcpp/tcp/server.h>
+#include <reactcpp/tcp/connection.h>
 
 /**
  *  End if

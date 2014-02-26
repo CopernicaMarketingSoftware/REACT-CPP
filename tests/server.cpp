@@ -16,22 +16,30 @@ int main()
     // we need a main loop
     React::MainLoop loop;
 
+    // @todo make address reusable
+
     // and a TCP server
-    React::Tcp::Server server(&loop, "192.168.1.203", 8765, [&server](React::ReadWatcher *watcher) {
+    React::Tcp::Server server(&loop, 8766, [&server](React::ReadWatcher *watcher) {
+    
+        std::cout << "server is readable" << std::endl;
     
         // create the connection
-//        React::Tcp::Connection connection(server);
-//        
-//        connection.onReadable([]() {
-//            
-//            
-//        });
-//        
-//        connection.onWritable([]() {
-//            
-//            
-//        });
-//        
+        React::Tcp::Connection connection(server);
+        
+        connection.onReadable([]() {
+            
+            std::cout << "connection is readable" << std::endl;
+            
+            
+        });
+        
+        connection.onWritable([]() {
+            
+            std::cout << "connection is writable" << std::endl;
+            
+            
+        });
+        
 //        connection.onReceived([](const char *data, size_t size) {
 //            
 //            
@@ -43,7 +51,6 @@ int main()
 //        });
         
         
-//        std::cout << server.address() << std::endl;
     
     
     
