@@ -26,7 +26,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Exception() {}
+    virtual ~Exception() noexcept {}
 };
 
 /**

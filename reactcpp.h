@@ -23,6 +23,7 @@
 #include <memory>
 #include <set>
 #include <map>
+#include <stdexcept>
 
 /**
  *  Other include files
