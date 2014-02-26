@@ -24,7 +24,7 @@ int main()
     
     // we'd like to be notified when input is available on stdin
     // the type of 'reader' is std::shared_ptr<React::Reader>
-    auto reader = loop.onReadable(STDIN_FILENO, [timer]() {
+    auto reader = loop.onReadable(STDIN_FILENO, [timer]() -> bool {
     
         // read input
         std::string buffer;
@@ -35,10 +35,13 @@ int main()
         
         // set the timer back to five seconds
         timer->set(5.0);
+        
+        // we want to be notified in the future too for readability events
+        return true;
     });
 
     // handler when control+c is pressed
-    loop.onSignal(SIGINT, [&loop, timer, reader]() {
+    loop.onSignal(SIGINT, [&loop, timer, reader]() -> bool {
         
         // report that we got a signal
         std::cout << "control+c detected" << std::endl;
@@ -48,11 +51,14 @@ int main()
         reader->cancel();
         
         // stop the application in one second
-        loop.onTimeout(1.0, [](React::TimeoutWatcher *timer) {
+        loop.onTimeout(1.0, []() {
         
             // exit the application
             exit(0);
         });
+        
+        // we dont need another SIGING event
+        return false;
     });
 
     // run the event loop

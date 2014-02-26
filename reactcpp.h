@@ -28,7 +28,6 @@
  *  Other include files
  */
 #include <reactcpp/exception.h>
-#include <reactcpp/callback.h>
 #include <reactcpp/types.h>
 #include <reactcpp/loop.h>
 #include <reactcpp/mainloop.h>

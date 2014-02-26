@@ -26,13 +26,13 @@ class StatusWatcher;
  *  Timestamp type is a wrapper around libev
  */
 using Timestamp = ev_tstamp;
-using ReadCallback = Callback<ReadWatcher>;
-using WriteCallback = Callback<WriteWatcher>;
-using TimeoutCallback = Callback<TimeoutWatcher>;
-using IntervalCallback = Callback<IntervalWatcher>;
-using SynchronizeCallback = Callback<SynchronizeWatcher>;
-using SignalCallback = Callback<SignalWatcher>;
-using StatusCallback = Callback<StatusWatcher>;
+using ReadCallback = std::function<bool()>;
+using WriteCallback = std::function<bool()>;
+using TimeoutCallback = std::function<void()>;
+using IntervalCallback = std::function<bool()>;
+using SynchronizeCallback = std::function<void()>;
+using SignalCallback = std::function<bool()>;
+using StatusCallback = std::function<bool(pid_t,int)>;
 
 /**
  *  End namespace

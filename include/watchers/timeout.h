@@ -67,7 +67,7 @@ protected:
             
             // notify parent (return value is not important, a timer is always 
             // cancelled after it expired)
-            _callback(this);
+            _callback();
         }
         else
         {

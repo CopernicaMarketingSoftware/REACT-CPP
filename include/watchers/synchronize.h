@@ -52,7 +52,7 @@ private:
     virtual void invoke() override
     {
         // call the callback
-        _callback(this);
+        _callback();
     }
 
 public:

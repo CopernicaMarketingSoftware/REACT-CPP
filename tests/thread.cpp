@@ -15,8 +15,9 @@ int main()
     // is ready with its task, the returned synchronizer object is of type
     // std::shared_ptr<Synchronizer>, and contains a thread safe pointer that
     // can be access from the other thread to notify us
-    auto synchronizer = loop.onSynchronize([]() {
+    auto synchronizer = loop.onSynchronize([]() -> bool {
         std::cout << "other thread has finished running" << std::endl;
+        return true;
     });
     
     // start a new thread
@@ -30,7 +31,7 @@ int main()
     });
     
     // we'd like to be notified when input is available on stdin
-    loop.onReadable(STDIN_FILENO, []() {
+    loop.onReadable(STDIN_FILENO, []() -> bool {
     
         // read input
         std::string buffer;
@@ -38,6 +39,9 @@ int main()
     
         // show what we read
         std::cout << buffer << std::endl;
+        
+        // we want more readability events
+        return true;
     });
 
     // run the event loop
