@@ -231,7 +231,7 @@ int main()
     });
 
     // handler when control+c is pressed
-    loop.onSignal(SIGINT, [&loop, timer, reader]() {
+    loop.onSignal(SIGINT, [&loop, timer, reader]() -> bool {
         
         // report that we got a signal
         std::cout << "control+c detected" << std::endl;
