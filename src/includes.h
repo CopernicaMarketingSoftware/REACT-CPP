@@ -17,6 +17,7 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include <iostream>
 #include "../include/types.h"
 #include "../include/loop.h"
 #include "../include/mainloop.h"
@@ -34,6 +35,8 @@
 #include "../include/net/ipv6.h"
 #include "../include/net/ip.h"
 #include "../include/dns/iprecord.h"
+#include "../include/dns/mxrecord.h"
+#include "../include/dns/mxresult.h"
 #include "../include/dns/types.h"
 #include "../include/dns/base.h"
 #include "../include/dns/resolver.h"
@@ -48,7 +51,8 @@
 #include "shared/signal.h"
 #include "shared/status.h"
 #include "dns/request.h"
-#include "dns/ipsrequest.h"
+#include "dns/iprequest.h"
+#include "dns/mxrequest.h"
 #include "dns/ipv4result.h"
 #include "dns/ipv6result.h"
-#include "dns/allipsresult.h"
+#include "dns/ipallresult.h"

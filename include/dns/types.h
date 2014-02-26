@@ -12,16 +12,20 @@
 namespace React { namespace Dns {
 
 /**
+ *  Forward declarations
+ */
+class MxResult;
+
+/**
  *  Types
  */
-using IpsResult         =   std::set<IpRecord>;
+using IpResult          =   std::set<IpRecord>;
  
 /**
  *  Callbacks
  */
-using IpsCallback       =   std::function<void(IpsResult &&ips, const char *error)>;
-using IpsSimpleCallback =   std::function<void(IpsResult &&ips)>;
-
+using IpCallback        =   std::function<void(IpResult &&ips, const char *error)>;
+using MxCallback        =   std::function<void(MxResult &&mx, const char *error)>;
 
 /**
  *  End namespace

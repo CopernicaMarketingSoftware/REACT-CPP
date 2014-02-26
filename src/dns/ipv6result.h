@@ -14,7 +14,7 @@ namespace React { namespace Dns {
 /**
  *  Class definition
  */
-class Ipv6Result : public IpsResult
+class Ipv6Result : public IpResult
 {
 public:
     /**

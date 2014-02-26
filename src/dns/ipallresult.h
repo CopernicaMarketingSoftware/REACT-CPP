@@ -1,5 +1,5 @@
 /**
- *  AllIpsResult.h
+ *  IpAllResult.h
  *
  *  Implementation-only class that processes the results of a call to fetch
  *  all Ips.
@@ -15,7 +15,7 @@ namespace React { namespace Dns {
 /**
  *  Class definition
  */
-class AllIpsResult : public IpsResult
+class IpAllResult : public IpResult
 {
 private:
     /**

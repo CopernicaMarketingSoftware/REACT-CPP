@@ -1,5 +1,5 @@
 /**
- *  IpsRequest.h
+ *  MxRequest.h
  *
  *  Class that contains all information for an IPv4 request
  *
@@ -14,14 +14,14 @@ namespace React { namespace Dns {
 /**
  *  Class definition
  */
-class IpsRequest : public Request
+class MxRequest : public Request
 {
 private:
     /**
      *  The callback to be called
      *  @var    IpsCallback
      */
-    IpsCallback _callback;
+    MxCallback _callback;
 
 public:
     /**
@@ -29,20 +29,20 @@ public:
      *  @param  resolver
      *  @param  callback
      */
-    IpsRequest(Base *resolver, const IpsCallback &callback) : 
+    MxRequest(Base *resolver, const MxCallback &callback) : 
         Request(resolver), _callback(callback) {}
     
     /**
      *  Destructor
      */
-    virtual ~IpsRequest() {}
+    virtual ~MxRequest() {}
     
     /**
      *  Invoke the callback
      *  @param  result          The result to report
      *  @param  error           Optional error message
      */
-    void invoke(IpsResult &&result, const char *error)
+    void invoke(MxResult &&result, const char *error)
     {
         _callback(std::move(result), error);
     }

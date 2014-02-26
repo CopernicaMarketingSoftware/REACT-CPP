@@ -21,7 +21,7 @@ namespace React { namespace Dns {
 static void ipv4callback(void *data, int status, int timeouts, unsigned char *buffer, int len)
 {
     // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
-    auto request = std::unique_ptr<IpsRequest>((IpsRequest *)data);
+    auto request = std::unique_ptr<IpRequest>((IpRequest *)data);
     
     // check result
     if (status == ARES_SUCCESS)
@@ -32,7 +32,7 @@ static void ipv4callback(void *data, int status, int timeouts, unsigned char *bu
     else
     {
         // report failure
-        request->invoke(IpsResult(), ares_strerror(status));
+        request->invoke(IpResult(), ares_strerror(status));
     }
 }
 
@@ -47,7 +47,7 @@ static void ipv4callback(void *data, int status, int timeouts, unsigned char *bu
 static void ipv6callback(void *data, int status, int timeouts, unsigned char *buffer, int len)
 {
     // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
-    auto request = std::unique_ptr<IpsRequest>((IpsRequest *)data);
+    auto request = std::unique_ptr<IpRequest>((IpRequest *)data);
     
     // check result
     if (status == ARES_SUCCESS)
@@ -58,7 +58,33 @@ static void ipv6callback(void *data, int status, int timeouts, unsigned char *bu
     else
     {
         // report failure
-        request->invoke(IpsResult(), ares_strerror(status));
+        request->invoke(IpResult(), ares_strerror(status));
+    }
+}
+
+/**
+ *  Callback method that is called when a resolver call for MX records completed
+ *  @param  data    User-supplied-data (pointer to the resolver-request)
+ *  @param  status  Status of the resolver
+ *  @param  timeout Number of times that a query timed out
+ *  @param  buffer  The answer buffer
+ *  @param  len     Length of the answer buffer
+ */
+static void mxcallback(void *data, int status, int timeouts, unsigned char *buffer, int len)
+{
+    // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
+    auto request = std::unique_ptr<MxRequest>((MxRequest *)data);
+    
+    // check result
+    if (status == ARES_SUCCESS)
+    {
+        // report success
+        request->invoke(MxResult(buffer, len), nullptr);
+    }
+    else
+    {
+        // report failure
+        request->invoke(MxResult(), ares_strerror(status));
     }
 }
 
@@ -69,13 +95,13 @@ static void ipv6callback(void *data, int status, int timeouts, unsigned char *bu
  *  @param  callback        Callback that is called once the addresses are resolved
  *  @return bool
  */
-bool Resolver::ips(const std::string &domain, int version, const IpsCallback &callback)
+bool Resolver::ip(const std::string &domain, int version, const IpCallback &callback)
 {
     // channel should be valid
     if (!_channel) return false;
     
     // construct request object
-    auto *request = new IpsRequest(this, callback);
+    auto *request = new IpRequest(this, callback);
     
     // what version do we need?
     if (version == 6)
@@ -108,16 +134,16 @@ bool Resolver::ips(const std::string &domain, int version, const IpsCallback &ca
  *  @param  callback
  *  @return bool
  */
-bool Resolver::ips(const std::string &domain, const IpsCallback &callback)
+bool Resolver::ip(const std::string &domain, const IpCallback &callback)
 {
     // channel should be valid
     if (!_channel) return false;
     
     // construct result object
-    auto results = std::shared_ptr<AllIpsResult>(new AllIpsResult());
+    auto results = std::shared_ptr<IpAllResult>(new IpAllResult());
  
     // the callback function
-    auto helper = [results, callback](IpsResult &&result, const char *error) {
+    auto helper = [results, callback](IpResult &&result, const char *error) {
         
         // merge the sets
         results->insert(result.begin(), result.end());
@@ -133,11 +159,35 @@ bool Resolver::ips(const std::string &domain, const IpsCallback &callback)
     };
     
     // fetch the IPv4 and IPv6 objects
-    if (ips(domain, 6, helper)) results->pending(+1);
-    if (ips(domain, 4, helper)) results->pending(+1);
+    if (ip(domain, 6, helper)) results->pending(+1);
+    if (ip(domain, 4, helper)) results->pending(+1);
     
     // check if anything is pending
     return results->pending() > 0;
+}
+
+/**
+ *  Find all MX records for a certain domain
+ *  @param  domain      The domain name to search MX records for
+ *  @param  callback    Callback that is called when found
+ *  @return bool
+ */
+bool Resolver::mx(const std::string &domain, const MxCallback &callback)
+{
+    // channel should be valid
+    if (!_channel) return false;
+    
+    // construct request object
+    auto *request = new MxRequest(this, callback);
+    
+    // tell the ares library to run the AAAA query
+    ares_query(_channel, domain.c_str(), ns_c_in, ns_t_mx, mxcallback, request);
+    
+    // set a new timeout
+    setTimeout();
+    
+    // done
+    return true;
 }
 
 /**

@@ -121,7 +121,7 @@ public:
  *  @param  ip
  *  @return ostream
  */
-inline std::ostream &operator<<(std::ostream &os, const IpRecord &ip)
+inline std::ostream &operator<<(std::ostream &os, const React::Dns::IpRecord &ip)
 {
     os << ip.ip();
     return os;

@@ -33,24 +33,7 @@ public:
      *  @param  callback
      *  @return bool
      */
-    bool ips(const std::string &domain, int version, const IpsCallback &callback);
-
-    /**
-     *  Find all IP addresses for a certain domain using a simpler callback
-     *  @param  domain      The domain to fetch the IPs for
-     *  @param  version     IP version, can be 4 or 6
-     *  @param  callback
-     *  @return bool
-     */
-    bool ips(const std::string &domain, int version, const IpsSimpleCallback &callback) 
-    { 
-        // pass on the call
-        return ips(domain, version, [callback](IpsResult &&ips, const char *error) { 
-            
-            // call the simple callback
-            callback(std::move(ips)); 
-        });
-    }
+    bool ip(const std::string &domain, int version, const IpCallback &callback);
 
     /**
      *  Find all IP addresses for a certain domain
@@ -59,24 +42,15 @@ public:
      *  @param  callback
      *  @return bool
      */
-    bool ips(const std::string &domain, const IpsCallback &callback);
+    bool ip(const std::string &domain, const IpCallback &callback);
 
     /**
-     *  Find all IP addresses for a certain domain using a simpler callback
-     *  This method fetches all IPs, no matter the version, both Ipv4 and Ipv6
-     *  @param  domain      The domain to fetch the IPs for
-     *  @param  callback
+     *  Find all MX records for a certain domain
+     *  @param  domain      The domain name to search MX records for
+     *  @param  callback    Callback that is called when found
      *  @return bool
      */
-    bool ips(const std::string &domain, const IpsSimpleCallback &callback) 
-    { 
-        // pass on the function
-        return ips(domain, [callback](IpsResult &&ips, const char *error) { 
-            
-            // call the simple callback
-            callback(std::move(ips)); 
-        });
-    }
+    bool mx(const std::string &domain, const MxCallback &callback);
 
 };
 

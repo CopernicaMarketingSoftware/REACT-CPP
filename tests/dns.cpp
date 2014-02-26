@@ -21,10 +21,17 @@ int main()
     React::Dns::Resolver resolver(&loop);
     
     // fetch all IP's
-    // @todo also support nog passing errors
-    resolver.ips("www.copernica.com", [](React::Dns::IpsResult &&ips) {
-        
+    resolver.ip("www.copernica.com", [](React::Dns::IpResult &&ips, const char *error) {
+     
+        std::cout << "IP" << std::endl;
         for (auto &ip : ips) std::cout << ip << std::endl;
+    });
+    
+    // fetch MX records
+    resolver.mx("copernica.com", [](React::Dns::MxResult &&mxs, const char *error) {
+        
+        std::cout << "MX" << std::endl;
+        for (auto &record : mxs) std::cout << record << std::endl;
     });
     
     // run the event loop

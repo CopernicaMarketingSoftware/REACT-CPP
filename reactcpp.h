@@ -24,6 +24,7 @@
 #include <set>
 #include <map>
 #include <stdexcept>
+#include <iostream>
 
 /**
  *  Other include files
@@ -47,6 +48,8 @@
 #include <reactcpp/net/ip.h>
 #include <reactcpp/net/address.h>
 #include <reactcpp/dns/iprecord.h>
+#include <reactcpp/dns/mxrecord.h>
+#include <reactcpp/dns/mxresult.h>
 #include <reactcpp/dns/types.h>
 #include <reactcpp/dns/base.h>
 #include <reactcpp/dns/resolver.h>
