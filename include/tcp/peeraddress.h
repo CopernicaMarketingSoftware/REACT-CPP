@@ -1,8 +1,8 @@
 /**
- *  SocketAddress.h
+ *  PeerAddress.h
  *
  *  Extension to the Net::Address class that can be directly applied to the
- *  socket and that will fetch the local socket address
+ *  socket and that will fetch the peer address
  *
  *  @copyright 2014 Copernica BV
  */
@@ -15,31 +15,31 @@ namespace React { namespace Tcp {
 /**
  *  Class definition
  */
-class SocketAddress : public Address
+class PeerAddress : public Address
 {
-public:
+public:    
     /**
      *  Constructor
      *  @param  fd      Filedescriptor
      */
-    SocketAddress(int fd) : Address(getsockname, fd) {}
+    PeerAddress(int fd) : Address(getpeername, fd) {}
     
     /**
      *  Constructor
      *  @param  socket  The socket
      */
-    SocketAddress(const Fd &socket) : SocketAddress(socket.fd()) {}
+    PeerAddress(const Fd &socket) : PeerAddress(socket.fd()) {}
     
     /**
      *  Constructor
      *  @param  socket  The socket
      */
-    SocketAddress(const Fd *socket) : SocketAddress(socket->fd()) {}
+    PeerAddress(const Fd *socket) : PeerAddress(socket->fd()) {}
     
     /**
      *  Destructor
      */
-    virtual ~SocketAddress() {}
+    virtual ~PeerAddress() {}
 };
 
 /**

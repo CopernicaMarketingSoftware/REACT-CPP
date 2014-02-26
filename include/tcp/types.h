@@ -15,11 +15,16 @@ namespace React { namespace Tcp {
  *  Forward declarations
  */
 class Connection;
+class Server;
 
 /**
  *  Callbacks
  */
-using ServerCallback    =   std::function<void(const std::shared_ptr<Connection> &connection)>;
+using LostCallback      =   std::function<void()>;
+using ConnectCallback   =   std::function<bool(Server *server)>;
+using ConstructCallback =   std::function<void(Connection *connection, const char *error)>;
+using ConnectedCallback =   std::function<void(const char *error)>;
+using DataCallback      =   std::function<bool(const void *buf, size_t size)>;
 
 /**
  *  End namespace

@@ -69,7 +69,7 @@ public:
      *
      *  @param  loop    loop to execute code in
      */
-    LoopWorkerImpl(Loop *loop) : _watcher(loop, [this]() { run(); }) {}
+    LoopWorkerImpl(Loop *loop) : _watcher(loop, std::bind(&LoopWorkerImpl::run, this)) {}
 
     /**
      *  Destructor

@@ -16,41 +16,51 @@ int main()
     // we need a main loop
     React::MainLoop loop;
 
-    // @todo make address reusable
-
     // and a TCP server
-    React::Tcp::Server server(&loop, 8766, [&server]() -> bool {
-    
-        std::cout << "server is readable" << std::endl;
+    React::Tcp::Server server(&loop, 8766, [&loop](React::Tcp::Server *server) -> bool {
     
         // create the connection
-        React::Tcp::Connection connection(server);
+        auto incoming = std::make_shared<React::Tcp::Connection>(server);
         
-        connection.onReadable([]() -> bool {
+        auto callback = [](React::Tcp::Connection *connection, const char *error) {
             
-            std::cout << "connection is readable" << std::endl;
             
+            
+            
+        };
+        
+        // create the outgoing connection
+        auto outgoing = std::make_shared<React::Tcp::Connection>(&loop, "145.255.129.234", 80, callback);
+        
+        // install handler when data comes in from the incoming connection
+        incoming->onData([outgoing](const void *buf, size_t size) -> bool {
+            
+            outgoing->send(buf, size);
             return true;
+        });
             
+        // install handler when data comes in from the incoming connection
+        outgoing->onData([incoming](const void *buf, size_t size) -> bool {
+            
+            incoming->send(buf, size);
+            return true;
         });
         
-        connection.onWritable([]() -> bool {
+        // install handler when connection closes
+        incoming->onLost([outgoing]() {
             
-            std::cout << "connection is writable" << std::endl;
+            std::cout << "incoming closed" << std::endl;
             
-            return true;
+            outgoing->close();
         });
         
-//        connection.onReceived([](const char *data, size_t size) {
-//            
-//            
-//        });
-//        
-//        connection.onClosed([]() {
-//            
-//            
-//        });
+        // install handler when connection closes
+        outgoing->onLost([incoming]() {
         
+            std::cout << "outgoing closed" << std::endl;
+            
+            incoming->close();
+        });
         
         // keep watching for readability
         return true;
@@ -58,6 +68,16 @@ int main()
     
     // show the server address
     std::cout << server.address() << std::endl;
+    
+    // we connect to the server ourselves
+    React::Tcp::Connection connection(&loop, "127.0.0.1", 8766, [&connection](React::Tcp::Connection *connection, const char *error) {
+        
+        // fail on error
+        if (error) return;
+        
+        // send data to the connection
+        connection.send("this is data\r\n", 14);
+    });
     
     // run the event loop
     loop.run();

@@ -52,8 +52,10 @@
 #include <reactcpp/dns/resolver.h>
 #include <reactcpp/tcp/exception.h>
 #include <reactcpp/tcp/types.h>
-#include <reactcpp/tcp/socket.h>
+#include <reactcpp/tcp/address.h>
 #include <reactcpp/tcp/socketaddress.h>
+#include <reactcpp/tcp/peeraddress.h>
+#include <reactcpp/tcp/socket.h>
 #include <reactcpp/tcp/server.h>
 #include <reactcpp/tcp/connection.h>
 

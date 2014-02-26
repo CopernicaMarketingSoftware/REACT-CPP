@@ -66,6 +66,15 @@ public:
     }
     
     /**
+     *  Is this a valid address?
+     *  @return bool
+     */
+    bool valid() const
+    {
+        return _ip.valid();
+    }
+    
+    /**
      *  Convert the object to a string
      *  @return string
      */

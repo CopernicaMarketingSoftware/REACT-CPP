@@ -29,6 +29,7 @@ protected:
      */
     int _fd;
     
+private:    
     /**
      *  Watcher for readability
      *  @var    ReadWatcher
@@ -41,6 +42,7 @@ protected:
      */
     std::weak_ptr<WriteWatcher> _writer;
     
+protected:
     /**
      *  Constructor
      *  @param  loop
@@ -60,7 +62,11 @@ public:
      *  @param  fd
      */
     Fd(Fd &&fd) : _loop(fd._loop), _fd(fd._fd), 
-        _reader(std::move(fd._reader)), _writer(std::move(fd._writer)) {}
+        _reader(std::move(fd._reader)), _writer(std::move(fd._writer)) 
+    {
+        // other fd is invalid
+        fd._fd = -1;
+    }
 
     /**
      *  Destructor

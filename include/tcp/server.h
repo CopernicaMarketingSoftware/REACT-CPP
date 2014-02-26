@@ -36,8 +36,7 @@ public:
      *  @param  port        Port number to listen to
      *  @param  callback    Function that is called for each incoming connection
      */
-    template <typename CALLBACK>
-    Server(Loop *loop, const Net::Ip &ip, uint16_t port, const CALLBACK &callback) :
+    Server(Loop *loop, const Net::Ip &ip, uint16_t port, const ConnectCallback &callback) :
         _socket(loop, ip, port)
     {
         // listen to the socket
@@ -45,7 +44,7 @@ public:
         
         // install handler when readable
         // @todo uninstall handler when closed
-        _socket.onReadable(callback);
+        onConnect(std::bind(callback, this));
     }
 
     /**
@@ -54,8 +53,7 @@ public:
      *  @param  ip          IP address to listen to
      *  @param  callback    Function that is called for each incoming connection
      */
-    template <typename CALLBACK>
-    Server(Loop *loop, const Net::Ip &ip, const CALLBACK &callback) : 
+    Server(Loop *loop, const Net::Ip &ip, const ConnectCallback &callback) : 
         Server(loop, ip, 0, callback) {}
 
     /**
@@ -64,8 +62,7 @@ public:
      *  @param  port        Port number to listen to
      *  @param  callback    Function that is called for each incoming connection
      */
-    template <typename CALLBACK>
-    Server(Loop *loop, uint16_t port, const CALLBACK &callback) : 
+    Server(Loop *loop, uint16_t port, const ConnectCallback &callback) : 
         Server(loop, Net::Ip(), port, callback) {}
     
     /**
@@ -73,14 +70,25 @@ public:
      *  @param  loop        Event loop
      *  @param  callback    Function that is called for each incoming connection
      */
-    template <typename CALLBACK>
-    Server(Loop *loop, const CALLBACK &callback) : 
+    Server(Loop *loop, const ConnectCallback &callback) : 
         Server(loop, Net::Ip(), 0, callback) {}
     
     /**
      *  Destructor
      */
     virtual ~Server() {}
+    
+    /**
+     *  Install connect handler
+     *  Your method is called every time that a connection can be accepted. The
+     *  previous handler will be overwritten
+     *  @param  callback
+     */
+    void onConnect(const ReadCallback &callback)
+    {
+        // install in socket
+        _socket.onReadable(callback);
+    }
     
     /**
      *  Retrieve the address to which the server is listening

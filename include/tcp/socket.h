@@ -139,7 +139,91 @@ public:
     virtual ~Socket()
     {
         // close the filedescriptor
-        close(_fd);
+        close();
+    }
+    
+    /**
+     *  Is the socket connected?
+     *  @return bool
+     */
+    bool connected() const
+    {
+        // filedescriptor must be valid
+        if (_fd < 0) return false;
+        
+        // check peer address
+        return PeerAddress(_fd).valid();
+    }
+
+    /**
+     *  Connect the socket to a remote IPv4 address
+     *  @param  ip
+     *  @param  port
+     *  @return bool
+     */
+    bool connect(const Net::Ipv4 &ip, uint16_t port) const
+    {
+        // structure to initialize
+        struct sockaddr_in info;
+        
+        // fill the members
+        info.sin_family = AF_INET;
+        info.sin_port = htons(port);
+        
+        // copy address
+        memcpy(&info.sin_addr, ip.internal(), sizeof(struct in_addr));
+        
+        // connect
+        return ::connect(_fd, (struct sockaddr *)&info, sizeof(struct sockaddr_in)) == 0 || errno == EINPROGRESS;
+    }
+
+    /**
+     *  Connect the socket to a remote IPv6 address
+     *  @param  ip
+     *  @param  port
+     *  @return bool
+     */
+    bool connect(const Net::Ipv6 &ip, uint16_t port) const
+    {
+        // structure to initialize
+        struct sockaddr_in6 info;
+        
+        // fill the members
+        info.sin6_family = AF_INET6;
+        info.sin6_port = htons(port);
+        info.sin6_flowinfo = 0;
+        info.sin6_scope_id = 0;
+        
+        // copy the address
+        memcpy(&info.sin6_addr, ip.internal(), sizeof(struct in6_addr));
+        
+        // connect
+        return ::connect(_fd, (struct sockaddr *)&info, sizeof(struct sockaddr_in6)) == 0 || errno == EINPROGRESS;
+    }
+    
+    /**
+     *  Connect the socket to a remote IP
+     *  @param  ip
+     *  @param  port
+     *  @return bool
+     */
+    bool connect(const Net::Ip &ip, uint16_t port) const
+    {
+        switch (ip.version()) {
+        case 4: return connect(ip.v4(), port);
+        case 6: return connect(ip.v6(), port);
+        default:return false;
+        }
+    }
+
+    /**
+     *  Connect the socket to a remote address
+     *  @param  address
+     *  @return bool
+     */
+    bool connect(const Net::Address &address) const
+    {
+        return connect(address.ip(), address.port());
     }
     
     /**
@@ -149,7 +233,15 @@ public:
      */
     bool listen(int backlog = 1) const
     {
-        return ::listen(_fd, backlog) == 0;
+        // check for success
+        if (::listen(_fd, backlog) != 0) return false;
+
+        // set SO_REUSADDR for listening sockets
+        int reuse = 1;
+        setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int));
+        
+        // done
+        return true;
     }
     
     /**
@@ -193,6 +285,22 @@ public:
     ssize_t recv(void *buf, size_t len, int flags = 0) const
     {
         return ::recv(_fd, buf, len, flags);
+    }
+    
+    /**
+     *  Close the socket
+     *  @return bool
+     */
+    bool close()
+    {
+        // try to close
+        if (::close(_fd) < 0 && errno != EBADF) return false;
+        
+        // forget the filedescriptor
+        _fd = -1;
+        
+        // done
+        return true;
     }
 
 };
