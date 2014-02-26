@@ -17,7 +17,6 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
-#include "../include/callback.h"
 #include "../include/types.h"
 #include "../include/loop.h"
 #include "../include/mainloop.h"

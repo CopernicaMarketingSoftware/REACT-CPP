@@ -44,7 +44,7 @@ int main()
     });
     
     // we'd like to be notified when input is available on stdin
-    loop.onReadable(STDIN_FILENO, []() {
+    loop.onReadable(STDIN_FILENO, []() -> bool {
     
         // read input
         std::string buffer;
@@ -52,16 +52,23 @@ int main()
     
         // show what we read
         std::cout << buffer << std::endl;
+        
+        // return true, so that we also return future read events
+        return true;
     });
 
     // handler when control+c is pressed
-    loop.onSignal(SIGINT, []() {
+    loop.onSignal(SIGINT, []() -> bool {
         
         // report that we got a signal
         std::cout << "control+c detected" << std::endl;
         
         // stop the application
         exit(0);
+        
+        // although this code is unreachable, we return false because
+        // we're no longer interested in future SIGINT signals
+        return false;
     });
 
     // run the event loop
@@ -77,32 +84,33 @@ the application reads from stdin is directly echo'd back to stdout. After five
 seconds the application automatically stops, and when the SIGINT signal is 
 caught, the application also exits.
 
-There is a subtle difference between the React::MainLoop and React::Loop
-classes. The React::MainLoop is supposed to run the main event loop for the 
-entire application, while the React::Loop classes are additional event loops
-that you can (for example) use in additional threads. In normal circumstances, 
-you will never have to instantiate more than once instance of the React::MainLoop 
-class, while it is perfectly legal to create as many React::Loop objects
-as you wish.
+There is a subtle difference between the React::MainLoop that we use in the 
+example above, and the React::Loop class that is also available. The React::MainLoop 
+is supposed to run the main event loop for the entire application, while the 
+React::Loop classes are additional event loops that you can (for example) use in 
+additional threads. In normal circumstances, you will never have to instantiate 
+more than once instance of the React::MainLoop class, while it is perfectly 
+legal to create as many React::Loop objects as you wish.
 
 Because the React::MainLoop class is intended to control the entire application,
-it has some additional methods to register signal handlers. Such methods are
-not available in the regular React::Loop class.
+it has some additional methods to register signal handlers and handlers to
+monitor child processes. Such methods are not available in the regular 
+React::Loop class.
 
 
-DIFFERENT TYPES OF CALLBACKS
-============================
+THE RETURN VALUE OF YOUR CALLBACKS
+==================================
 
 In the first example we showed how to install handlers on the loop object.
-However, once such a handler is set, the loop will keep calling it every time
+Once such a handler is set, the loop will keep calling it every time
 a filedescriptor becomes active. But what if you no longer are interested in
 these events? In that case you have a number of options to stop a callback 
 from being called.
 
-The first one is by using a different type of callback. In the examples above,
-we had registered straightforward callbacks that did not take any parameters. 
-However, a different type of callback can be registered too: one that takes
-a parameter which you can modify to stop subsequent calls to the callback.
+The first one is by having your callback function return false. If your callback
+returns a boolean false value, your handler function is removed from the event
+loop and you will no longer be notified. If you return true on the other hand,
+the handler will stay in the event loop, and will also be called in the future.
 
 ````c++
 #include <reactcpp.h>
@@ -115,7 +123,7 @@ int main()
     React::MainLoop loop;
     
     // we'd like to be notified when input is available on stdin
-    loop.onReadable(STDIN_FILENO, [](React::ReadWatcher *reader) {
+    loop.onReadable(STDIN_FILENO, []() -> bool {
     
         // read input
         std::string buffer;
@@ -125,7 +133,7 @@ int main()
         std::cout << buffer << std::endl;
         
         // from this moment on, we no longer want to receive updates
-        reader->cancel();
+        return false;
     });
     
     // run the event loop
@@ -137,59 +145,45 @@ int main()
 ````
 
 The program above is only interested in read events until the first line
-from stdin has been read. After that it calls the cancel() method on the
-React::ReadWatcher object, to inform the event loop that it is no longer 
-interested in read events.
+from stdin has been read. After that it return false, to inform the event loop 
+that it is no longer interested in read events.
 
-In the above example, this also means that the program automatically exits after
-the first line has been read. The reason for this is that the run() method of 
+This will also mean that the program in the example automatically exits after
+the first read line. The reason for this is that the run() method of 
 the React::Loop and React::MainLoop classes automatically stops running when 
-there are no more callback functions active. By calling the ReadWatcher::cancel()
-method, the last and only registered callback function is cancelled, and the
-event loop has nothing left to monitor.
-
-The type of the parameter that is passed to your callback function depends on
-the type of callback function that you have registered.
-
-````c++
-loop.onReadable(fd, [](React::ReadWatcher *watcher) { ... });
-loop.onWritable(fd, [](React::WriteWatcher *watcher) { ... });
-loop.onTimeout(time, [](React::TimeoutWatcher *watcher) { ... });
-loop.onInterval(time, [](React::IntervalWatcher *watcher) { ... });
-loop.onSignal(signum, [](React::SignalWatcher *watcher) { ... });
-````
-
-The objects that are passed to your callback function all have in common that
-they have a cancel() method that you can call to stop further events from
-being received. Next to the cancel() method, additional methods are available
-to deal with the specific behavior of the item being watched.
+there are no more callback functions active. By returning false, the last and 
+only registered callback function is cancelled, and the event loop has nothing 
+left to monitor.
 
 
 RETURN VALUE OF LOOP METHODS
 ============================
 
-The objects that are passed to the callback functions (React::ReadWatcher, 
-React::WriteWatcher, etc) are also returned from the event-registering functions.
-This means that it is possible to store the return value of a call to 
-Loop::onReadable() in a variable, and that you will not have to wait for the
-callback to be called to cancel further calls to it.
+The Loop::onReadable(), Loop::onWritable(), etcetera methods all return a 
+(shared) pointer to a watcher object. In the first example we had not used this 
+return value, but you can store this watcher object in a variable. If you
+have access to this watcher object, you can cancel calls to your handler
+without having to wait for your callback to be called to return false.
 
-All Loop::onSomething() methods return a shared_ptr to the watcher object. 
-You may store this shared_ptr if you'd like to use it in the future, but you do 
-not have to. Internally, the library
-also keeps a pointer to the object, and will pass on that pointer to your callback 
-every time it is called. So even if you decide to discard the return value, the 
-object will live on. The only way to stop the callback from being active is by 
-calling the cancel() method on the returned object, or on the same object
-inside your callback function.
+The returned watcher is a shared_ptr. Internally, the library also keeps a 
+pointer to the object, so that even if you decide to discard the watcher object,
+it will live on inside the lib. The only way to stop the callback from being 
+active is either by calling the cancel() method on the watcher object, or by 
+having your callback function return false.
 
 With this knowledge we are going to modify our earlier example. The echo 
 application that we showed before is updated to set the timer back to five
-seconds every time that some input is read, so that the application will no
+seconds every time that some input is read. The application will therefore no
 longer stop five seconds after it was started, but five seconds after the last
 input was received. We also change the signal watcher: the moment CTRL+C is 
-pressed, the application will stop responding, but it will delay it's exit 
+pressed, the application stops responding, and will delay it's exit 
 for one second.
+
+The watcher objects all have in common that they have a cancel() method that 
+stops further events from being delivered to your callback function. Next to the 
+cancel() method, additional methods are available to deal with the specific 
+behavior of the item being watched.
+
 
 ````c++
 #include <reactcpp.h>
@@ -206,7 +200,9 @@ int main()
     React::MainLoop loop;
 
     // set a timer to stop the application if it is idle for five seconds
-    // note that the type of 'timer' is std::shared_ptr<React::TimeoutWatcher>
+    // note that the type of 'timer' is std::shared_ptr<React::TimeoutWatcher>,
+    // also note that the timer callback does not return a boolean, as a timer
+    // stops anyway after it expires.
     auto timer = loop.onTimeout(5.0, []() {
     
         // report that the timer expired
@@ -218,7 +214,7 @@ int main()
     
     // we'd like to be notified when input is available on stdin
     // the type of 'reader' is std::shared_ptr<React::ReadWatcher>
-    auto reader = loop.onReadable(STDIN_FILENO, [timer]() {
+    auto reader = loop.onReadable(STDIN_FILENO, [timer]() -> bool {
     
         // read input
         std::string buffer;
@@ -229,6 +225,9 @@ int main()
         
         // set the timer back to five seconds
         timer->set(5.0);
+        
+        // keep checking for readability
+        return true;
     });
 
     // handler when control+c is pressed
@@ -247,6 +246,9 @@ int main()
             // exit the application
             exit(0);
         });
+        
+        // no longer check for signals
+        return false;
     });
 
     // run the event loop
@@ -260,7 +262,7 @@ int main()
 CONSTRUCT WATCHER OBJECTS
 =========================
 
-Up to now we have registered callback methods via the Loop::onSomething()
+Up to now we had registered callback methods via the Loop::onSomething()
 methods. These methods return a shared pointer to an object that keeps the
 watcher state. It is also possible to create such objects directly, without 
 calling a Loop::onSomething method(). This can be very convenient, because
@@ -282,7 +284,7 @@ int main()
     React::MainLoop loop;
 
     // we'd like to be notified when input is available on stdin
-    React::ReadWatcher reader(loop, STDIN_FILENO, []() {
+    React::ReadWatcher reader(loop, STDIN_FILENO, []() -> bool {
     
         // read input
         std::string buffer;
@@ -290,6 +292,9 @@ int main()
     
         // show what we read
         std::cout << buffer << std::endl;
+        
+        // keep checking readability
+        return true;
     });
 
     // run the event loop
@@ -302,7 +307,7 @@ int main()
 
 Conceptually, there is not a big difference between calling Loop::onReadable()
 to register a callback function, or by instantiating a React::ReadWatcher object
-yourself. In my opinition, the code that utilizes a call to Loop::onReadable() 
+yourself. In my opinion, the code that utilizes a call to Loop::onReadable() 
 is easier to understand and maintain, but by creating a ReadWatcher class yourself,
 you have full ownership of the class and can destruct it whenever you like -
 which can be useful too.
@@ -319,26 +324,18 @@ std::shared_ptr<ReadWatcher> Loop::onReadable(int fd, const ReadCallback &callba
 std::shared_ptr<WriteWatcher> Loop::onWritable(int fd, const WriteCallback &callback);
 ````
 
-Two possible callback signatures are accepted, one that takes a pointer to a
-watcher object (React::ReadWatcher* for the callback to onReadable(), and 
-React::WriteWatcher* for the callback to onWritable()), and a callback that does not
-accept parameters at all.
-
-````c++
-loop.onReadable(fd, [](ReadWatcher *watcher) { ... });
-loop.onReadable(fd, []() { ... });
-loop.onWritable(fd, [](WriteWatcher *watcher) { ... });
-loop.onWritable(fd, []() { ... });
-````
+The callbacks are simple functions that return a bool, and that do not take
+any parameters. If they return true, the filedescriptor will stay in the event
+loop and your callback will also be called in the future if the filedescriptor
+becomes readable or writable again. If the function returns false, the 
+descriptor is removed from the event loop.
 
 You can also create a ReadWatcher or WriteWatcher object yourself. In that case you will
 not have to use the Loop::onReadable() or Loop::onWritable() methods:
 
 ````c++
-ReadWatcher watcher(&loop, fd, [](ReadWatcher *watcher) { ... });
-ReadWatcher watcher(&loop, fd, []() { ... });
-WriteWatcher watcher(&loop, fd, [](WriteWatcher *watcher) { ... });
-WriteWatcher watcher(&loop, fd, []() { ... });
+ReadWatcher watcher(&loop, fd, []() -> bool { ...; return true; });
+WriteWatcher watcher(&loop, fd, []() -> bool { ...; return true; });
 ````
 
 TIMERS AND INTERVALS
@@ -363,28 +360,25 @@ std::shared_ptr<IntervalWatcher>
 Loop::onInterval(Timestamp initial, Timestamp interval, const IntervalCallback &callback);
 ````
 
-Just like the callbacks for filedescriptors, the callbacks for timers and intervals 
-also come in two forms: with and without a parameter.
+Just like the callbacks for filedescriptors, the callback for intervals should
+return a boolean value to indicate whether the interval timer should be kept
+in the event loop or not. The callback function for timeouts does not return
+any value, because timeouts only trigger once, and are never kept in the event
+loop.
 
 ````c++
-loop.onTimeout(3.0, [](TimeoutWatcher *watcher) { ... });
 loop.onTimeout(3.0, []() { ... });
-loop.onInterval(5.0, [](IntervalWatcher *watcher) { ... });
-loop.onInterval(5.0, []() { ... });
-loop.onInterval(0.0, 5.0, [](IntervalWatcher *watcher) { ... });
-loop.onInterval(0.0, 5.0, []() { ... });
+loop.onInterval(5.0, []() -> bool { ...; return true; });
+loop.onInterval(0.0, 5.0, []() -> bool { ...; return true; });
 ````
 
 And you can of course also instantiate React::TimeoutWatcher and 
 React::IntervalWatcher objects directly:
 
 ````c++
-TimeoutWatcher watcher(&loop, 3.0, [](TimeoutWatcher *watcher) { ... });
 TimeoutWatcher watcher(&loop, 3.0, []() { ... });
-IntervalWatcher watcher(&loop, 5.0, [](IntervalWatcher *watcher) { ... });
-IntervalWatcher watcher(&loop, 5.0, []() { ... });
-IntervalWatcher watcher(&loop, 2.0, 5.0, [](IntervalWatcher *watcher) { ... });
-IntervalWatcher watcher(&loop, 2.0, 5.0, []() { ... });
+IntervalWatcher watcher(&loop, 5.0, []() -> bool { ...; return true; });
+IntervalWatcher watcher(&loop, 2.0, 5.0, []() -> bool { ...; return true; });
 ````
 
 SIGNALS
@@ -404,19 +398,18 @@ for it:
 std::shared_ptr<SignalWatcher> MainLoop::onSignal(int signum, const SignalCallback &callback);
 ````
 
-And the callback function comes (of course) in two versions:
+And the callback function (of course) should return a boolean value to tell
+the event loop if the handler should be kept in the loop or not.
 
 ````c++
-loop.onSignal(SIGTERM, [](SignalWatcher *watcher) { ... });
-loop.onSignal(SIGTERM, []() { ... });
+loop.onSignal(SIGTERM, []() -> bool { ...; return true; });
 ````
 
-And for signals it is of course also possible to bypass the methods on the 
+And for signals it also is possible to bypass the methods on the 
 loop class, and create a React::Signal object yourself:
 
 ````c++
-SignalWatcher watcher(&loop, SIGTERM, [](SignalWatcher *watcher) { ... });
-SIgnalWatcher watcher(&loop, SIGTERM, []() { ... });
+SIgnalWatcher watcher(&loop, SIGTERM, []() -> bool { ...; return true; });
 ````
 
 CHILD PROCESSES
@@ -436,22 +429,25 @@ processes terminate. Set trace to true to receive all notifications, and to fals
 to receive only for process exits.
 
 ````c++
-std::shared_ptr<StatusWatcher> MainLoop::onStatusChange(pid_t pid, bool trace, const SignalCallback &callback);
+std::shared_ptr<StatusWatcher> 
+MainLoop::onStatusChange(pid_t pid, bool trace, const SignalCallback &callback);
 ````
 
-And the callback function comes (of course) in two versions:
+The callback function has a different signature than most of the other callbacks,
+as it should accept two parameters: the pid of the process for which the status
+changed, and its new status. The return value should be true if you want to keep
+the child watcher active, or false if you no longer want to be informed about
+child process status changes.
 
 ````c++
-loop.onStatusChange(pid, false, [](StatusWatcher *watcher) { ... });
-loop.onStatusChange(pid, false, []() { ... });
+loop.onStatusChange(pid, false, [](pid_t pid, int status) -> bool { ...; return true; });
 ````
 
 And just like all other watcher objects, you can also create StatusWatcher objects
 yourself:
 
 ````c++
-StatusWatcher watcher(&loop, pid, trace, [](StatusWatcher *watcher) { ... });
-StatusWatcher watcher(&loop, pid, trace, []() { ... });
+StatusWatcher watcher(&loop, pid, trace, [](pid_t pid, int status) -> bool { ... });
 ````
 
 THREAD SYNCHRONIZATION
@@ -501,7 +497,7 @@ int main()
     });
     
     // we'd like to be notified when input is available on stdin
-    loop.onReadable(STDIN_FILENO, []() {
+    loop.onReadable(STDIN_FILENO, []() -> bool {
     
         // read input
         std::string buffer;
@@ -509,6 +505,9 @@ int main()
     
         // show what we read
         std::cout << buffer << std::endl;
+        
+        // keep receiving readability notifications
+        return true;
     });
 
     // run the event loop
@@ -530,18 +529,17 @@ Loop::onSynchronize(). This installs the callback function that runs in the
 main thread, and it returns the thread safe endpoint that can be used by other
 thread to interup the main event loop.
 
-The SynchronizeWatcher is similar to classes like React::ReadWatcher, React::WriteWatcher, 
-React::TimeoutWatcher, etcetera. And the callback also comes in two forms: one with
-a parameter and one without, and the watcher can be registered via a call
-to Loop::onSynchronize() and by creating a Synchronizer object directly:
+The SynchronizeWatcher is similar to classes like React::ReadWatcher, 
+React::WriteWatcher, React::TimeoutWatcher, etcetera. However, the callback is 
+slightly different as it does not return a value. The watcher is active for as
+long as you have a reference to the synchronizer object.
+
 
 ````c++
 // example how to install a synchronizer via the Loop class
-loop.onSynchronize([](SynchronizeWatcher *watcher) { ... });
-loop.onSynchronize([]() { ... });
+auto watcher = loop.onSynchronize([]() { ... });
 
 // example how to install the synchronizer as an object
-SynchronizeWatcher watcher(loop, [](SynchronizeWatcher *watcher) { ... });
 SynchronizeWatcher watcher(loop, []() { ... });
 ````
 

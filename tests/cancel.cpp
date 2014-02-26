@@ -8,7 +8,7 @@ int main()
     React::MainLoop loop;
     
     // we'd like to be notified when input is available on stdin
-    loop.onReadable(STDIN_FILENO, [](React::ReadWatcher *reader) {
+    loop.onReadable(STDIN_FILENO, []() -> bool {
     
         // read input
         std::string buffer;
@@ -18,7 +18,7 @@ int main()
         std::cout << buffer << std::endl;
         
         // from this moment on, we no longer want to receive updates
-        reader->cancel();
+        return false;
     });
     
     // run the event loop

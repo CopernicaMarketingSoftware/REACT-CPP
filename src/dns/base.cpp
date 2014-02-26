@@ -132,8 +132,9 @@ void Base::check(int fd, bool read, bool write)
     if (read && _readers.find(fd) == _readers.end())
     {
         // add a new reader
-        auto *watcher = new ReadWatcher(_loop, fd, [this,fd]() { 
+        auto *watcher = new ReadWatcher(_loop, fd, [this,fd]() -> bool { 
             ares_process_fd(_channel, fd, 0);
+            return true;
         });
         
         // add to the set of watcher
@@ -144,8 +145,9 @@ void Base::check(int fd, bool read, bool write)
     if (write && _writers.find(fd) == _writers.end()) 
     {
         // add a watcher
-        auto *watcher = new WriteWatcher(_loop, fd, [this,fd]() { 
+        auto *watcher = new WriteWatcher(_loop, fd, [this,fd]() -> bool { 
             ares_process_fd(_channel, 0, fd); 
+            return true;
         });
         
         // add to the set of watchers

@@ -54,8 +54,14 @@ protected:
      */
     virtual void invoke() override
     {
+        // check if object is still valid
+        Monitor monitor(this);
+        
         // call the callback
-        _callback(this);
+        if (_callback(_watcher.rpid, _watcher.rstatus) || !monitor.valid()) return;
+        
+        // cancel watcher
+        cancel();
     }
 
 public:
