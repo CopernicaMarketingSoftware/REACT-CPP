@@ -98,8 +98,8 @@ monitor child processes. Such methods are not available in the regular
 React::Loop class.
 
 
-THE RETURN VALUE OF YOUR CALLBACKS
-==================================
+CALLBACK RETURN VALUES
+======================
 
 In the first example we showed how to install handlers on the loop object.
 Once such a handler is set, the loop will keep calling it every time
