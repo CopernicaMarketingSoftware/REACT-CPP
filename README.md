@@ -145,11 +145,11 @@ int main()
 ````
 
 The program above is only interested in read events until the first line
-from stdin has been read. After that it return false, to inform the event loop 
+from stdin is read. After that it returns false, to inform the event loop 
 that it is no longer interested in read events.
 
-This will also mean that the program in the example automatically exits after
-the first read line. The reason for this is that the run() method of 
+This also means that the program in the example automatically exits after
+the first line. The reason for this is that the run() method of 
 the React::Loop and React::MainLoop classes automatically stops running when 
 there are no more callback functions active. By returning false, the last and 
 only registered callback function is cancelled, and the event loop has nothing 
@@ -163,10 +163,10 @@ The Loop::onReadable(), Loop::onWritable(), etcetera methods all return a
 (shared) pointer to a watcher object. In the first example we had not used this 
 return value, but you can store this watcher object in a variable. If you
 have access to this watcher object, you can cancel calls to your handler
-without having to wait for your callback to be called to return false.
+without having to wait for your callback to be called first.
 
 The returned watcher is a shared_ptr. Internally, the library also keeps a 
-pointer to the object, so that even if you decide to discard the watcher object,
+pointer to this object, so that even if you decide to discard the watcher object,
 it will live on inside the lib. The only way to stop the callback from being 
 active is either by calling the cancel() method on the watcher object, or by 
 having your callback function return false.
