@@ -18,6 +18,9 @@ namespace React {
  */
 std::shared_ptr<ReadWatcher> Loop::onReadable(int fd, const ReadCallback &callback)
 {
+    // check if callback is valid
+    if (!callback) return nullptr;
+    
     // create self-destructing implementation object
     auto *reader = new SharedReadWatcher(this, fd, callback);
     
@@ -33,6 +36,9 @@ std::shared_ptr<ReadWatcher> Loop::onReadable(int fd, const ReadCallback &callba
  */
 std::shared_ptr<WriteWatcher> Loop::onWritable(int fd, const WriteCallback &callback)
 {
+    // check if callback is valid
+    if (!callback) return nullptr;
+
     // create self-destructing implementation object
     auto *writer = new SharedWriteWatcher(this, fd, callback);
     
@@ -48,6 +54,9 @@ std::shared_ptr<WriteWatcher> Loop::onWritable(int fd, const WriteCallback &call
  */
 std::shared_ptr<TimeoutWatcher> Loop::onTimeout(Timestamp timeout, const TimeoutCallback &callback)
 {
+    // check if callback is valid
+    if (!callback) return nullptr;
+
     // create self-destructing implementation object
     auto *timer = new SharedTimeoutWatcher(this, timeout, callback);
     
@@ -64,6 +73,9 @@ std::shared_ptr<TimeoutWatcher> Loop::onTimeout(Timestamp timeout, const Timeout
  */
 std::shared_ptr<IntervalWatcher> Loop::onInterval(Timestamp initial, Timestamp timeout, const IntervalCallback &callback)
 {
+    // check if callback is valid
+    if (!callback) return nullptr;
+
     // create self-destructing implementation object
     auto *interval = new SharedIntervalWatcher(this, initial, timeout, callback);
     
@@ -78,6 +90,9 @@ std::shared_ptr<IntervalWatcher> Loop::onInterval(Timestamp initial, Timestamp t
  */
 std::shared_ptr<SynchronizeWatcher> Loop::onSynchronize(const SynchronizeCallback &callback)
 {
+    // check if callback is valid
+    if (!callback) return nullptr;
+
     // create implementation object
     auto *synchronizer = new SynchronizeWatcher(this, callback);
     

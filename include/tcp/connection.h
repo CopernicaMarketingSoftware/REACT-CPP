@@ -186,6 +186,10 @@ public:
                 if (_readCallback) _socket.onReadable(_readCallback);
                 if (_writeCallback) _socket.onWritable(_writeCallback);
                 
+                // we no longer need the cached callbacks
+                _readCallback = nullptr;
+                _writeCallback = nullptr;
+                
                 // report to callback
                 callback(nullptr);
             }
@@ -216,12 +220,12 @@ public:
     {
         // skip if already closed
         if (_status == closed) return;
-        
-        // install the new callback
-        _readCallback = callback;
-        
+
         // start right away if the socket is already connected
         if (_status == connected) _socket.onReadable(_readCallback);
+        
+        // else store the callback for when the connection is ready
+        else _readCallback = callback;
     }
     
     /**
@@ -238,11 +242,11 @@ public:
         // skip if already closed
         if (_status == closed) return;
 
-        // install the new callback
-        _writeCallback = callback;
-        
         // start right away
         if (_status == connected) _socket.onWritable(callback);
+
+        // else store the callback for when the connection is ready
+        else _writeCallback = callback;
     }
     
     /**
@@ -329,6 +333,28 @@ public:
     ssize_t send(const void *buf, size_t len, int flags = 0) const
     {
         return _socket.send(buf, len, flags);
+    }
+
+    /**
+     *  Send data to the connection
+     * 
+     *  This method is directly forwarded to the ::writev() system call. This 
+     *  means that you should be prepared to handle errors, and that not all 
+     *  bytes will always be sent. If not all bytes were sent, you should also 
+     *  install an onWritable handler to wait for the connection to become 
+     *  writable again, and try to send the remaining data then.
+     * 
+     *  If you need a smarter send() method that always works, you can wrap
+     *  the connection class in an React::Tcp::Out() object, and send your
+     *  data to that object instead.
+     * 
+     *  @param  iov     Array of struct iovec objects
+     *  @param  iovcnt  Number of items in the array
+     *  @return ssize_t Number of bytes sent
+     */
+    ssize_t writev(const struct iovec *iov, int iovcnt) const
+    {
+        return _socket.writev(iov, iovcnt);
     }
     
     /**

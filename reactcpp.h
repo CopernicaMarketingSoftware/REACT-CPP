@@ -25,6 +25,7 @@
 #include <map>
 #include <stdexcept>
 #include <iostream>
+#include <list>
 
 /**
  *  Other include files
@@ -61,6 +62,8 @@
 #include <reactcpp/tcp/socket.h>
 #include <reactcpp/tcp/server.h>
 #include <reactcpp/tcp/connection.h>
+#include <reactcpp/tcp/buffer.h>
+#include <reactcpp/tcp/out.h>
 
 /**
  *  End if

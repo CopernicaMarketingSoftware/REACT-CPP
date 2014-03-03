@@ -128,7 +128,7 @@ public:
     {
         // cancel the current watcher (if we have one)
         if (!_writer.expired()) _writer.lock()->cancel();
-        
+
         // and set up a new one
         auto watcher = _loop->onWritable(_fd, callback);
         

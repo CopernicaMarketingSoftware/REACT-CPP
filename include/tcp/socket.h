@@ -271,7 +271,21 @@ public:
     {
         return ::send(_fd, buf, len, flags);
     }
-    
+
+    /**
+     *  Send data to the connection
+     * 
+     *  This method is directly forwarded to the ::writev() system call
+     * 
+     *  @param  iov     Array of struct iovec objects
+     *  @param  iovcnt  Number of items in the array
+     *  @return ssize_t Number of bytes sent
+     */
+    ssize_t writev(const struct iovec *iov, int iovcnt) const
+    {
+        return ::writev(_fd, iov, iovcnt);
+    }
+        
     /**
      *  Receive data from the connection
      * 

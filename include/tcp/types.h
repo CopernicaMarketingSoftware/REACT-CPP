@@ -25,6 +25,7 @@ using ConnectCallback   =   std::function<bool(Server *server)>;
 using ConstructCallback =   std::function<void(Connection *connection, const char *error)>;
 using ConnectedCallback =   std::function<void(const char *error)>;
 using DataCallback      =   std::function<bool(const void *buf, size_t size)>;
+using CloseCallback     =   std::function<void()>;
 
 /**
  *  End namespace
