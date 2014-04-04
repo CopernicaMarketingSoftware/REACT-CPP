@@ -27,57 +27,49 @@ private:
      *  The Connection class is a friend
      */
     friend class Connection;
-    
+
 public:
     /**
      *  Constructor to listen to a specific port on a specific IP
      *  @param  loop        Event loop
      *  @param  ip          IP address to listen to
      *  @param  port        Port number to listen to
-     *  @param  callback    Function that is called for each incoming connection
      */
-    Server(Loop *loop, const Net::Ip &ip, uint16_t port, const ConnectCallback &callback) :
+    Server(Loop *loop, const Net::Ip &ip, uint16_t port) :
         _socket(loop, ip, port)
     {
         // listen to the socket
         if (!_socket.listen()) throw Exception(strerror(errno));
-        
-        // install handler when readable
-        // @todo uninstall handler when closed
-        onConnect(std::bind(callback, this));
     }
 
     /**
      *  Constructor to listen to a random port on a specific IP
      *  @param  loop        Event loop
      *  @param  ip          IP address to listen to
-     *  @param  callback    Function that is called for each incoming connection
      */
-    Server(Loop *loop, const Net::Ip &ip, const ConnectCallback &callback) : 
-        Server(loop, ip, 0, callback) {}
+    Server(Loop *loop, const Net::Ip &ip) :
+        Server(loop, ip, 0) {}
 
     /**
      *  Constructor to listen to a specific port
      *  @param  loop        Event loop
      *  @param  port        Port number to listen to
-     *  @param  callback    Function that is called for each incoming connection
      */
-    Server(Loop *loop, uint16_t port, const ConnectCallback &callback) : 
-        Server(loop, Net::Ip(), port, callback) {}
-    
+    Server(Loop *loop, uint16_t port) :
+        Server(loop, Net::Ip(), port) {}
+
     /**
      *  Constructor to listen to a random port
      *  @param  loop        Event loop
-     *  @param  callback    Function that is called for each incoming connection
      */
-    Server(Loop *loop, const ConnectCallback &callback) : 
-        Server(loop, Net::Ip(), 0, callback) {}
-    
+    Server(Loop *loop) :
+        Server(loop, Net::Ip(), 0) {}
+
     /**
      *  Destructor
      */
     virtual ~Server() {}
-    
+
     /**
      *  Install connect handler
      *  Your method is called every time that a connection can be accepted. The
@@ -89,7 +81,7 @@ public:
         // install in socket
         _socket.onReadable(callback);
     }
-    
+
     /**
      *  Retrieve the address to which the server is listening
      *  @return Net::Address
@@ -99,7 +91,7 @@ public:
         // return the socket address
         return SocketAddress(_socket);
     }
-    
+
     /**
      *  Retrieve the IP address to which it is listening
      *  @return Net::Ip
@@ -109,7 +101,7 @@ public:
         // fetch the ip from the socket address
         return SocketAddress(_socket).ip();
     }
-    
+
     /**
      *  Retrieve the port number to which the server is listening
      *  @return uint16_t
