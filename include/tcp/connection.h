@@ -54,6 +54,11 @@ private:
     WriteCallback _writeCallback;
 
     /**
+     *  The handler when the connection is established
+     */
+    ConnectedCallback _connectedCallback;
+
+    /**
      *  The handler when the connection closes
      *  @var    LostCallback
      */
@@ -72,6 +77,7 @@ private:
         _readCallback = nullptr;
         _writeCallback = nullptr;
         _lostCallback = nullptr;
+        _connectedCallback = nullptr;
     }
 
 public:
@@ -100,6 +106,40 @@ public:
     {
         // try connecting
         if (!_socket.connect(toip, toport)) throw Exception(strerror(errno));
+
+        // wait until writable
+        _socket.onWritable([this]() {
+
+            // is the socket connected?
+            if (_socket.connected())
+            {
+                // change status
+                _status = connected;
+
+                // install the callbacks if the user had already assigned them
+                if (_readCallback) _socket.onReadable(_readCallback);
+                if (_writeCallback) _socket.onWritable(_writeCallback);
+
+                // report to callback
+                if (_connectedCallback) _connectedCallback(nullptr);
+
+                // we no longer need the cached callbacks
+                _readCallback = nullptr;
+                _writeCallback = nullptr;
+                _connectedCallback = nullptr;
+            }
+            else
+            {
+                // @todo can we get a strerror?
+                if (_connectedCallback) _connectedCallback("Connect failure");
+
+                // reset the object
+                reset();
+            }
+
+            // no other writability events please
+            return false;
+        });
     }
 
     /**
@@ -166,38 +206,8 @@ public:
         // must be busy connecting
         if (_status != connecting) return;
 
-        // wait until writable
-        _socket.onWritable([this, callback]() {
-
-            // is the socket connected?
-            if (_socket.connected())
-            {
-                // change status
-                _status = connected;
-
-                // install the callbacks if the user had already assigned them
-                if (_readCallback) _socket.onReadable(_readCallback);
-                if (_writeCallback) _socket.onWritable(_writeCallback);
-
-                // we no longer need the cached callbacks
-                _readCallback = nullptr;
-                _writeCallback = nullptr;
-
-                // report to callback
-                callback(nullptr);
-            }
-            else
-            {
-                // reset the object
-                reset();
-
-                // @todo can we get a strerror?
-                callback("Connect failure");
-            }
-
-            // no other writability events please
-            return false;
-        });
+        // install the handler
+        _connectedCallback = callback;
     }
 
     /**
