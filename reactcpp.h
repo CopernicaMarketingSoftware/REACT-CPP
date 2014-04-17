@@ -26,6 +26,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <list>
+#include <cstring>
 
 /**
  *  Other include files
@@ -64,6 +65,7 @@
 #include <reactcpp/tcp/connection.h>
 #include <reactcpp/tcp/buffer.h>
 #include <reactcpp/tcp/out.h>
+#include <reactcpp/tcp/in.h>
 
 /**
  *  End if

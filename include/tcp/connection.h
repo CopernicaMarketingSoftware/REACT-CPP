@@ -65,6 +65,11 @@ private:
     LostCallback _lostCallback;
 
     /**
+     *  Data buffer for incoming data
+     */
+    char *_buffer = nullptr;
+
+    /**
      *  Reset the object
      */
     void reset()
@@ -194,7 +199,10 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Connection() {}
+    virtual ~Connection() {
+        // clean up the buffer
+        delete [] _buffer;
+    }
 
     /**
      *  Install a handler that is called when the socket is connected
@@ -250,71 +258,6 @@ public:
 
         // else store the callback for when the connection is ready
         else _writeCallback = callback;
-    }
-
-    /**
-     *  Check if the connection is lost
-     *
-     *  The registered method will be called when the connection is lost,
-     *  but only in combination with onData. If you use onReadable instead,
-     *  this callback will never be called. In that case: to check for a
-     *  closed connection see whether recv() returns 0 bytes.
-     *
-     *  @param  callback
-     */
-    void onLost(const LostCallback &callback)
-    {
-        // skip if already closed
-        if (_status == closed) return;
-
-        // install the callback
-        _lostCallback = callback;
-    }
-
-    /**
-     *  Check for data to come in
-     *
-     *  This method is called for all data that comes in via the connection.
-     *  If you set a data hander, the onReadable handler that you've set before
-     *  will be overridden.
-     *
-     *  @param  callback
-     */
-    void onData(const DataCallback &callback)
-    {
-        // install a readability handler
-        onReadable([this, callback]() -> bool {
-
-            // construct a pretty big buffer
-            char buffer[4096];
-
-            // receive the data
-            ssize_t bytes = _socket.recv(buffer, 4096);
-
-            // check for error
-            if (bytes == 0 || (bytes < 0 && errno != EAGAIN && errno != EWOULDBLOCK))
-            {
-                // remember the lost callback
-                auto lostCallback = _lostCallback;
-
-                // reset the object
-                reset();
-
-                // report error
-                if (lostCallback) lostCallback();
-
-                // we know enough
-                return false;
-            }
-            else
-            {
-                // should be zero or more
-                if (bytes <= 0) return true;
-
-                // report
-                return callback(buffer, bytes);
-            }
-        });
     }
 
     /**
