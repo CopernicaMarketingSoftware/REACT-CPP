@@ -90,6 +90,9 @@ public:
         // not possible if already running
         if (_running) return false;
 
+        // now we are running
+        _running = true;
+
 #if EV_VERSION_MAJOR == 3
         // start running for old libev library version
         ev_loop(_loop, 0);
@@ -98,8 +101,8 @@ public:
         ev_run(_loop, 0);
 #endif
 
-        // done
-        return _running = true;
+        // loop has ended
+        return true;
     }
 
     /**
