@@ -38,6 +38,7 @@
 #include "../include/dns/mxrecord.h"
 #include "../include/dns/mxresult.h"
 #include "../include/dns/types.h"
+#include "../include/dns/channel.h"
 #include "../include/dns/base.h"
 #include "../include/dns/resolver.h"
 #include "workerimpl.h"

@@ -44,6 +44,7 @@ public:
      */
     void invoke(IpResult &&result, const char *error)
     {
+        // execute the callback
         _callback(std::move(result), error);
     }
 };

@@ -21,8 +21,8 @@ namespace React { namespace Dns {
 static void ipv4callback(void *data, int status, int timeouts, unsigned char *buffer, int len)
 {
     // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
-    auto request = std::unique_ptr<IpRequest>((IpRequest *)data);
-    
+    auto request = static_cast<IpRequest*>(data);
+
     // check result
     if (status == ARES_SUCCESS)
     {
@@ -34,6 +34,9 @@ static void ipv4callback(void *data, int status, int timeouts, unsigned char *bu
         // report failure
         request->invoke(IpResult(), ares_strerror(status));
     }
+
+    // free the request when it is done
+    request->free();
 }
 
 /**
@@ -47,8 +50,9 @@ static void ipv4callback(void *data, int status, int timeouts, unsigned char *bu
 static void ipv6callback(void *data, int status, int timeouts, unsigned char *buffer, int len)
 {
     // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
-    auto request = std::unique_ptr<IpRequest>((IpRequest *)data);
-    
+    // auto request = std::unique_ptr<IpRequest>((IpRequest *)data);
+    auto request = static_cast<IpRequest*>(data);
+
     // check result
     if (status == ARES_SUCCESS)
     {
@@ -60,6 +64,9 @@ static void ipv6callback(void *data, int status, int timeouts, unsigned char *bu
         // report failure
         request->invoke(IpResult(), ares_strerror(status));
     }
+
+    // free the request when it is done
+    request->free();
 }
 
 /**
@@ -73,8 +80,8 @@ static void ipv6callback(void *data, int status, int timeouts, unsigned char *bu
 static void mxcallback(void *data, int status, int timeouts, unsigned char *buffer, int len)
 {
     // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
-    auto request = std::unique_ptr<MxRequest>((MxRequest *)data);
-    
+    auto request = static_cast<MxRequest*>(data);
+
     // check result
     if (status == ARES_SUCCESS)
     {
@@ -86,6 +93,9 @@ static void mxcallback(void *data, int status, int timeouts, unsigned char *buff
         // report failure
         request->invoke(MxResult(), ares_strerror(status));
     }
+
+    // free the request when it is done
+    request->free();
 }
 
 /**
@@ -98,7 +108,7 @@ static void mxcallback(void *data, int status, int timeouts, unsigned char *buff
 bool Resolver::ip(const std::string &domain, int version, const IpCallback &callback)
 {
     // channel should be valid
-    if (!_channel) return false;
+    if (!*_channel) return false;
     
     // construct request object
     auto *request = new IpRequest(this, callback);
@@ -107,12 +117,12 @@ bool Resolver::ip(const std::string &domain, int version, const IpCallback &call
     if (version == 6)
     {
         // tell the ares library to run the AAAA query
-        ares_query(_channel, domain.c_str(), ns_c_in, ns_t_aaaa, ipv6callback, request);
+        ares_query(*_channel, domain.c_str(), ns_c_in, ns_t_aaaa, ipv6callback, request);
     }
     else if (version == 4)
     {
         // tell the ares library to run the A query
-        ares_query(_channel, domain.c_str(), ns_c_in, ns_t_a, ipv4callback, request);
+        ares_query(*_channel, domain.c_str(), ns_c_in, ns_t_a, ipv4callback, request);
     }
     else
     {
@@ -137,7 +147,7 @@ bool Resolver::ip(const std::string &domain, int version, const IpCallback &call
 bool Resolver::ip(const std::string &domain, const IpCallback &callback)
 {
     // channel should be valid
-    if (!_channel) return false;
+    if (!*_channel) return false;
     
     // construct result object
     auto results = std::shared_ptr<IpAllResult>(new IpAllResult());
@@ -175,13 +185,13 @@ bool Resolver::ip(const std::string &domain, const IpCallback &callback)
 bool Resolver::mx(const std::string &domain, const MxCallback &callback)
 {
     // channel should be valid
-    if (!_channel) return false;
+    if (!*_channel) return false;
     
     // construct request object
     auto *request = new MxRequest(this, callback);
     
     // tell the ares library to run the AAAA query
-    ares_query(_channel, domain.c_str(), ns_c_in, ns_t_mx, mxcallback, request);
+    ares_query(*_channel, domain.c_str(), ns_c_in, ns_t_mx, mxcallback, request);
     
     // set a new timeout
     setTimeout();
