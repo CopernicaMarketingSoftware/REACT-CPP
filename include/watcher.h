@@ -28,14 +28,18 @@ protected:
          *  @var    Watcher
          */
         Watcher *_watcher;
-    
+
     public:
         /**
          *  Constructor
          *  @param  watcher
          */
-        Monitor(Watcher *watcher) : _watcher(watcher) {}
-        
+        Monitor(Watcher *watcher) : _watcher(watcher)
+        {
+            // store monitor in watcher
+            _watcher->_monitor = this;
+        }
+
         /**
          *  Destructor
          */
@@ -43,7 +47,7 @@ protected:
         {
             if (_watcher) _watcher->_monitor = nullptr;
         }
-        
+
         /**
          *  Check if the monitor is valid
          *  @return bool
@@ -52,7 +56,7 @@ protected:
         {
             return _watcher != nullptr;
         }
-        
+
         /**
          *  Invalidate the object
          */
@@ -61,13 +65,13 @@ protected:
             _watcher = nullptr;
         }
     };
-    
+
     /**
      *  Pointer to the monitor now active
      *  @var    Monitor
      */
     Monitor *_monitor = nullptr;
-        
+
 public:
     /**
      *  Destructor
