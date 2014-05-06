@@ -18,38 +18,56 @@ class Channel
 {
 private:
     /**
+     *  Pointer to the loop
+     *  @var    Loop
+     */
+    Loop *_loop;
+
+    /**
+     *  Set of readers
+     *  @var    std::map
+     */
+    std::map<int,std::unique_ptr<ReadWatcher>> _readers;
+
+    /**
+     *  Set of writers
+     *  @var    std::map
+     */
+    std::map<int,std::unique_ptr<WriteWatcher>> _writers;
+
+    /**
      *  The actual underlying channel
      */
     ares_channel _channel = nullptr;
+
+    /**
+     *  Timer
+     *  @var    TimeoutWatcher
+     */
+    TimeoutWatcher _timer;
 public:
     /**
      *  Constructor
-     *
-     *  Creates the channel
-     *
-     *  @param  options     the channel options
-     *  @param  mask        option mask
      */
-    Channel(ares_options& options, int mask)
-    {
-        // initialize the channel
-        ares_init_options(&_channel, &options, mask);
-    }
+    Channel(Loop *loop);
 
     /**
      *  Destructor
      */
-    virtual ~Channel()
-    {
-        // if there is no channel we have nothing to cleanup
-        if (!_channel) return;
+    virtual ~Channel();
 
-        // cancel all current requests
-        ares_cancel(_channel);
+    /**
+     *  Set the timeout for the next iteration
+     */
+    void setTimeout();
 
-        // destroy the channel
-        ares_destroy(_channel);
-    }
+    /**
+     *  Check a certain filedescriptor for readability or writability
+     *  @param  fd      Filedescriptor
+     *  @param  read    Check for readability
+     *  @param  write   Check for writability
+     */
+    void check(int fd, bool read, bool write);
 
     /**
      *  Check whether the channel is valid

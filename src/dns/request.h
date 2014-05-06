@@ -34,21 +34,13 @@ protected:
      *  Constructor
      *  @param  resolver
      */
-    Request(Base *resolver) : _resolver(resolver), _channel(resolver->channel())
-    {
-        // increment pending calls
-        resolver->increment();
-    }
+    Request(Base *resolver) : _resolver(resolver), _channel(resolver->channel()) {}
 
 public:
     /**
      *  Destructor
      */
-    virtual ~Request()
-    {
-        // decrement pending calls
-        _resolver->decrement();
-    }
+    virtual ~Request() {}
 
     /**
      *  Schedule a delete of the request

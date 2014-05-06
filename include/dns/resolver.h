@@ -20,12 +20,12 @@ public:
      *  @param  loop    Event loop
      */
     Resolver(Loop *loop) : Base(loop) {}
-    
+
     /**
      *  Destructor
      */
     virtual ~Resolver() {}
-    
+
     /**
      *  Find all IP addresses for a certain domain
      *  @param  domain      The domain to fetch the IPs for

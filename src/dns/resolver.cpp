@@ -109,10 +109,10 @@ bool Resolver::ip(const std::string &domain, int version, const IpCallback &call
 {
     // channel should be valid
     if (!*_channel) return false;
-    
+
     // construct request object
     auto *request = new IpRequest(this, callback);
-    
+
     // what version do we need?
     if (version == 6)
     {
@@ -129,10 +129,10 @@ bool Resolver::ip(const std::string &domain, int version, const IpCallback &call
         // error
         return false;
     }
-    
+
     // set a new timeout
-    setTimeout();
-    
+    _channel->setTimeout();
+
     // done
     return true;
 }
@@ -148,30 +148,30 @@ bool Resolver::ip(const std::string &domain, const IpCallback &callback)
 {
     // channel should be valid
     if (!*_channel) return false;
-    
+
     // construct result object
     auto results = std::shared_ptr<IpAllResult>(new IpAllResult());
- 
+
     // the callback function
     auto helper = [results, callback](IpResult &&result, const char *error) {
-        
+
         // merge the sets
         results->insert(result.begin(), result.end());
-        
+
         // report the error
         if (error) results->setError(error);
-        
+
         // check if anything is still pending
         if (results->pending(-1) > 0) return;
-        
+
         // pending calls are ready, proceed
         callback(std::move(*results), results->error());
     };
-    
+
     // fetch the IPv4 and IPv6 objects
     if (ip(domain, 6, helper)) results->pending(+1);
     if (ip(domain, 4, helper)) results->pending(+1);
-    
+
     // check if anything is pending
     return results->pending() > 0;
 }
@@ -186,16 +186,16 @@ bool Resolver::mx(const std::string &domain, const MxCallback &callback)
 {
     // channel should be valid
     if (!*_channel) return false;
-    
+
     // construct request object
     auto *request = new MxRequest(this, callback);
-    
+
     // tell the ares library to run the AAAA query
     ares_query(*_channel, domain.c_str(), ns_c_in, ns_t_mx, mxcallback, request);
-    
+
     // set a new timeout
-    setTimeout();
-    
+    _channel->setTimeout();
+
     // done
     return true;
 }
