@@ -27,7 +27,7 @@ private:
      *  Are we still running?
      *  @var    bool
      */
-    bool _running = true;
+    volatile bool _running = true;
 
     /**
      *  The callbacks to execute from the main thread
@@ -62,7 +62,7 @@ private:
             while (_callbacks.empty() && _running) _condition.wait(lock);
 
             // are we no longer supposed to be running?
-            if (!_running) return;
+            if (_callbacks.empty()) return;
 
             // retrieve the callback
             auto callback = std::move(_callbacks.front());

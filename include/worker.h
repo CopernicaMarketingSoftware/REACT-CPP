@@ -4,10 +4,10 @@
  *  A worker implements synchronous, thread-safe execution
  *  of code in another thread.
  *
- *  When a worker is instantiated around a loop, the code
- *  will be executed in the context of this loop. If no
- *  loop is provided, a thread is started to execute code
- *  that is not supposed to block the main thread.
+ *  When a worker is instantiated around a loop, the code that is passed
+ *  to the execute() method will be executed in the context of the loop
+ *  object passed to the constructor. If no loop is provided, a thread
+ *  is started to execute code that is not supposed to block the main thread.
  *
  *  @copyright 2014 Copernica BV
  */
