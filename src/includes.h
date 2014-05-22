@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <ares.h>
 #include <string.h>
+#include <curl/curl.h>
 #include <memory>
 #include <map>
 #include <set>
@@ -23,6 +24,9 @@
 #include "../include/mainloop.h"
 #include "../include/watcher.h"
 #include "../include/timeval.h"
+#include "../include/deferred.h"
+#include "../include/net/result.h"
+#include "../include/net/request.h"
 #include "../include/watchers/read.h"
 #include "../include/watchers/write.h"
 #include "../include/watchers/timeout.h"
@@ -44,6 +48,7 @@
 #include "workerimpl.h"
 #include "loopworkerimpl.h"
 #include "threadworkerimpl.h"
+#include "curl.h"
 #include "shared.h"
 #include "shared/read.h"
 #include "shared/write.h"

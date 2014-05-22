@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
+#include <curl/curl.h>
 
 /**
  *  C++ dependencies
@@ -37,6 +38,7 @@
 #include <reactcpp/mainloop.h>
 #include <reactcpp/worker.h>
 #include <reactcpp/watcher.h>
+#include <reactcpp/deferred.h>
 #include <reactcpp/watchers/read.h>
 #include <reactcpp/watchers/write.h>
 #include <reactcpp/watchers/signal.h>
@@ -49,6 +51,7 @@
 #include <reactcpp/net/ipv6.h>
 #include <reactcpp/net/ip.h>
 #include <reactcpp/net/address.h>
+#include <reactcpp/net/request.h>
 #include <reactcpp/dns/iprecord.h>
 #include <reactcpp/dns/mxrecord.h>
 #include <reactcpp/dns/mxresult.h>
