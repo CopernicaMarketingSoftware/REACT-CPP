@@ -135,7 +135,7 @@ private:
                 else
                 {
                     // we should only update the first buffer
-                    _data[_first].iov_base += size;
+                    _data[_first].iov_base = static_cast<void*>(static_cast<char*>(_data[_first].iov_base) + size);
                     _data[_first].iov_len -= size;
 
                     // update counters
