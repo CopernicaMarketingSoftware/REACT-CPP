@@ -143,7 +143,7 @@ public:
         Ipv6 invalid;
         
         // compare if equal to invalid
-        return memcmp(&_addr, &invalid._addr, sizeof(struct in6_addr)) == 0;
+        return memcmp(&_addr, &invalid._addr, sizeof(struct in6_addr)) != 0;
     }
     
     /**

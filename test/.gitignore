@@ -1,0 +1,5 @@
+gtest-1.7.0.zip
+gtest-1.7.0/
+*.o
+*.a
+test.out
