@@ -78,7 +78,7 @@ private:
          *  @param  size        size of the data
          *  @return             number of bytes added
          */
-        size_t add(const char *data, size_t size)
+        size_t add(const void *data, size_t size)
         {
             // skip if capacity has been reached
             if (_current >= CAPACITY) return 0;
@@ -255,7 +255,7 @@ public:
      *  @param  size        size of the data
      *  @return             number of bytes added
      */
-    size_t add(const char *data, size_t size)
+    size_t add(const void *data, size_t size)
     {
         // add to the back
         size_t added = _parts.empty() ? 0 : _parts.back()->add(data, size);
@@ -267,7 +267,7 @@ public:
             _parts.emplace_back(new BufferPart<128>());
 
             // and store data in it
-            added += _parts.back()->add(data + added, size);
+            added += _parts.back()->add((const char*)data + added, size);
         }
 
         // return the number of bytes added

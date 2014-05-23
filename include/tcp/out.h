@@ -196,7 +196,7 @@ public:
      *  @param  size        Size of the data
      *  @return             Number of bytes virtually sent
      */
-    size_t send(const char *data, size_t size)
+    size_t send(const void *data, size_t size)
     {
         // impossible when no longer active
         if (_status != status_active) return 0;
@@ -223,7 +223,7 @@ public:
             if (result < 0) result = 0;
 
             // add remaining bytes to buffer
-            _buffer.add(data + result, size - result);
+            _buffer.add((const char*)data + result, size - result);
 
             // check for writability
             checkWritable();
