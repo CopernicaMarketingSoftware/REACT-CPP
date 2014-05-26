@@ -35,6 +35,11 @@ private:
     std::string _body;
 
     /**
+     *  Buffer to write the headers
+     */
+    std::string _headers;
+
+    /**
      *  Shared pointer to the deferred result, which basically holds the user
      *  specified callbacks
      */
@@ -65,6 +70,12 @@ public:
      *  @return std::string
      */
     const std::string &body() const { return _body; }
+
+    /**
+     *  Retrieve the headers of the result
+     *  @return std::string
+     */
+    const std::string &headers() const { return _headers; }
 
     std::shared_ptr<DeferredResult> deferred() const { return _deferred; }
 };

@@ -13,7 +13,7 @@
 namespace React { namespace Curl {
 
 /**
- *  cURL callback function for body data
+ *  cURL write callback
  */
 static size_t onWrite(char *data, size_t size, size_t nmemb, void *userdata)
 {
@@ -38,6 +38,8 @@ Result::Result(CURL *handle, const std::shared_ptr<DeferredResult> &callbacks, C
 {
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, onWrite);
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, &_body);
+    curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION, onWrite);
+    curl_easy_setopt(handle, CURLOPT_WRITEHEADER, &_headers);
 }
 
 /**
