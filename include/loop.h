@@ -12,6 +12,14 @@
 namespace React {
 
 /**
+ *  Forward declarations
+ */
+namespace Curl {
+    class Curl; // This is an internal class though :(
+    class Request;
+}
+
+/**
  *  Class definition
  */
 class Loop
@@ -29,19 +37,30 @@ private:
      */
     bool _running = false;
 
-
 protected:
     /**
      *  Protected constructor to wrap around an already allocated loop
      *  @var    struct ev_loop
      */
-    Loop(struct ev_loop *loop) : _loop(loop) {}
+    Loop(struct ev_loop *loop)
+    : _loop(loop) {}
 
 public:
     /**
      *  Constructor
      */
-    Loop() : _loop(ev_loop_new(EVFLAG_AUTO)) {}
+    Loop()
+    : _loop(ev_loop_new(EVFLAG_AUTO)) {}
+
+    /**
+     *  We cannot be copied
+     */
+    Loop(const Loop& that) = delete;
+
+    /**
+     *  Nor can we be moved
+     */
+    Loop(Loop&& that) = delete;
 
     /**
      *  Destructor

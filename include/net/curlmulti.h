@@ -1,7 +1,8 @@
 /**
- *  Curl.h
+ *  CurlMulti.h
  *
- *  Main CURL handle for React event loop
+ *  cURL Multi for React event loop, this will do smart tricks to saves on bandwidth
+ *  and improve performance
  *
  *  @copyright 2014 Copernica BV
  */
@@ -12,15 +13,15 @@
 namespace React { namespace Curl {
 
 /**
- *  Main CURL handle definition
+ *  Main CURLMulti handle definition
  */
-class Curl
+class CurlMulti
 {
 private:
     /**
      *  cURL multi handler
      */
-    CURLM* _handle = nullptr;
+    CURLM* _handle;
 
     /**
      *  The event Loop
@@ -41,6 +42,17 @@ private:
     std::map<int, std::shared_ptr<WriteWatcher>> _write_watchers;
 
     /**
+     *  The amount of running handles
+     */
+    int _running = 0;
+
+    /**
+     *  This will check if there are curl operations that are finished, if there
+     *  are the callbacks attached to it will be executed and it will be removed
+     */
+    void checkFinished();
+
+    /**
      *  Callback function for cURL where it'll let us know about file descriptors we have
      *  to add or remove
      */
@@ -51,21 +63,27 @@ private:
      */
     static int setupTimeout(CURLM *multi, long timeout, void *userdata);
 
-protected:
+public:
     /**
      *  Constructor
      */
-    Curl(Loop *loop);
-public:
-    /**
-     *  Get the Curl object associated with the specified Loop
-     */
-    static Curl* get(Loop *loop);
+    CurlMulti(Loop *loop);
 
     /**
      *  Deconstructor
      */
-    virtual ~Curl();
+    virtual ~CurlMulti();
+
+    /**
+     *  Casting operator to cast the Curl object to a cURL multi handler, used
+     *  to add CURL objects to the multi handler.
+     *
+     *  @return CURLM*
+     */
+    bool add(CURL *curl_easy)
+    {
+        return curl_multi_add_handle(_handle, curl_easy) == CURLM_OK;
+    }
 };
 
 /**

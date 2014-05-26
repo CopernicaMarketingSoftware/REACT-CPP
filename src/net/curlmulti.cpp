@@ -1,7 +1,8 @@
 /**
- *  Curl.cpp
+ *  CurlMulti.cpp
  *
- *  Main CURL handle for React event loop
+ *  cURL Multi for React event loop, this will do smart tricks to saves on bandwidth
+ *  and improve performance
  *
  *  @copyright 2014 Copernica BV
  */
@@ -13,56 +14,53 @@
 namespace React { namespace Curl {
 
 /**
- *  Static map which maps our curl objects to loops
- *  @todo Somehow remove our Curl objects upon destruction of the Loop objects.
- */
-static std::map<Loop*, std::unique_ptr<Curl>> _instances;
-
-/**
- *  Get the Curl object associated with the specified Loop
- */
-Curl *Curl::get(Loop *loop)
-{
-    // Look for loop in our _instances map
-    auto iter = _instances.find(loop);
-
-    // If we found what we were looking for return it
-    if (iter != _instances.end()) return iter->second.get();
-
-    // If we didn't find it, create it, append it and return it
-    Curl *output = new Curl(loop);
-    _instances[loop] = std::unique_ptr<Curl>(output); // Turn it into a unique_ptr
-    return output;
-}
-
-/**
  *  Constructor
  */
-Curl::Curl(Loop* loop)
+CurlMulti::CurlMulti(Loop* loop)
 : _handle(curl_multi_init())
 , _loop(loop)
 {
-    curl_multi_setopt(_handle, CURLMOPT_SOCKETFUNCTION, Curl::setupSocket);
+    curl_multi_setopt(_handle, CURLMOPT_SOCKETFUNCTION, CurlMulti::setupSocket);
     curl_multi_setopt(_handle, CURLMOPT_SOCKETDATA, this);
-    curl_multi_setopt(_handle, CURLMOPT_TIMERFUNCTION, Curl::setupTimeout);
+    curl_multi_setopt(_handle, CURLMOPT_TIMERFUNCTION, CurlMulti::setupTimeout);
     curl_multi_setopt(_handle, CURLMOPT_TIMERDATA, this);
 }
 
 /**
  *  Deconstructor
  */
-Curl::~Curl()
+CurlMulti::~CurlMulti()
 {
     if (_handle) curl_multi_cleanup(_handle);
+}
+
+void CurlMulti::checkFinished()
+{
+    CURLMsg *msg = nullptr;
+    int handlers = 0;
+    while ((msg = curl_multi_info_read(_handle, &handlers)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            Result *result = nullptr;
+            if (curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &result) == CURLE_OK && result != nullptr)
+            {
+                result->deferred()->success(*result);
+                curl_multi_remove_handle(_handle, msg->easy_handle);
+                curl_easy_cleanup(msg->easy_handle);
+                delete result;
+            }
+        }
+    }
 }
 
 /**
  *  Callback function for cURL where it'll let us know about file descriptors we have
  *  to add or remove
  */
-int Curl::setupSocket(CURL *curl_easy, curl_socket_t fd, int action, void *userdata, void *socketpointer)
+int CurlMulti::setupSocket(CURL *curl_easy, curl_socket_t fd, int action, void *userdata, void *socketpointer)
 {
-    Curl *curl = (Curl*) userdata;
+    CurlMulti *curl = static_cast<CurlMulti*>(userdata);
     if (action == CURL_POLL_REMOVE)
     {
         // look for the file descriptor
@@ -90,9 +88,10 @@ int Curl::setupSocket(CURL *curl_easy, curl_socket_t fd, int action, void *userd
             auto iter = curl->_read_watchers.find(fd);
             if (iter == curl->_read_watchers.end())
             {
-                curl->_read_watchers[fd] = curl->_loop->onReadable(fd, [curl, fd, action]() {
+                curl->_read_watchers[fd] = curl->_loop->onReadable(fd, [curl, fd]() {
                     // tell cURL that it may read from fd
-                    curl_multi_socket_action(curl->_handle, fd, action, NULL);
+                    curl_multi_socket_action(curl->_handle, fd, CURL_POLL_IN, &curl->_running);
+                    curl->checkFinished();
                     return true;
                 });
             }
@@ -103,14 +102,16 @@ int Curl::setupSocket(CURL *curl_easy, curl_socket_t fd, int action, void *userd
             auto iter = curl->_write_watchers.find(fd);
             if (iter == curl->_write_watchers.end())
             {
-                curl->_write_watchers[fd] = curl->_loop->onWritable(fd, [curl, fd, action]() {
+                curl->_write_watchers[fd] = curl->_loop->onWritable(fd, [curl, fd]() {
                     // tell cURL that it may write to fd
-                    curl_multi_socket_action(curl->_handle, fd, action, NULL);
+                    curl_multi_socket_action(curl->_handle, fd, CURL_POLL_OUT, &curl->_running);
+                    curl->checkFinished();
                     return true;
                 });
             }
         }
     }
+
     // cURL documentation says that we must return 0 from here
     return 0;
 }
@@ -118,12 +119,20 @@ int Curl::setupSocket(CURL *curl_easy, curl_socket_t fd, int action, void *userd
 /**
  *  Callback function for cURL where it'll ask us to tickle it in timeout milliseconds.
  */
-int Curl::setupTimeout(CURLM *multi, long timeout, void *userdata)
+int CurlMulti::setupTimeout(CURLM *multi, long timeout, void *userdata)
 {
-    Curl *curl = (Curl*) userdata;
-    curl->_loop->onTimeout(timeout/1000, [multi]() {
-        curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, NULL);
-    });
+    // Cast our userdata
+    CurlMulti *curl = static_cast<CurlMulti*>(userdata);
+
+    // Declare our callback
+    auto callback = [curl]() {
+        curl_multi_socket_action(curl->_handle, CURL_SOCKET_TIMEOUT, 0, &curl->_running);
+    };
+
+    // If the timeout is over 0 schedule it
+    if (timeout > 0) curl->_loop->onTimeout(timeout/1000, callback);
+    else callback();
+
     // cURL documentation says that we must return 0 from here
     return 0;
 }

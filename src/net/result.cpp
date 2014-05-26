@@ -13,29 +13,31 @@
 namespace React { namespace Curl {
 
 /**
+ *  cURL callback function for body data
+ */
+static size_t onWrite(char *data, size_t size, size_t nmemb, void *userdata)
+{
+    // Turn our userdata into our Result
+    std::string *body = (std::string*) userdata;
+
+    // Append the data to our body buffer
+    body->append(data, size * nmemb);
+
+    // Return the amount of bytes processed (all of them)
+    return size * nmemb;
+}
+
+/**
  *  Constructor
  *
  *  @param  handle The cURL handle to hook into for the results
  */
-Result::Result(CURL* handle)
+Result::Result(CURL *handle, const std::shared_ptr<DeferredResult> &callbacks, CurlMulti *curl)
+: _deferred(callbacks)
+, _curl(curl)
 {
-    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, Result::onWrite);
-    curl_easy_setopt(handle, CURLOPT_WRITEDATA, this);
-}
-
-/**
- *  cURL callback function for body data
- */
-size_t Result::onWrite(char *data, size_t size, size_t nmemb, void *userdata)
-{
-    // Turn our userdata into our Result
-    Result *result = (Result*) userdata;
-
-    // Append the data to our body buffer
-    result->_body.append(data, size * nmemb);
-
-    // Return the amount of bytes processed (all of them)
-    return size * nmemb;
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, onWrite);
+    curl_easy_setopt(handle, CURLOPT_WRITEDATA, &_body);
 }
 
 /**

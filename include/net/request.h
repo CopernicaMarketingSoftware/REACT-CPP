@@ -18,42 +18,52 @@ class Request
 {
 private:
     /**
-     *  The curl handle for this request
+     *  The curl handle that we purely use to build the request
      */
-    CURL* _handle = nullptr;
+    CURL* _builder;
+
+    /**
+     *  The event loop the request will be made on
+     */
+    Loop *_loop;
 
 public:
     /**
      *  Constructor
      *
+     *  @todo Add constructor that accepts some kind of public curl multi object
+     *
      *  @param  loop    Event loop
-     *  @todo Fill this constructor with default curl options
+     *  @param  url     Request url
      */
-    Request(Loop *loop, const std::string& url)
-    : _handle(curl_easy_init())
-    {
-        // Set default curl options here
-    }
+    Request(Loop *loop, const std::string &url);
 
     /**
      *  Deconstructor
      */
-    virtual ~Request()
+    virtual ~Request();
+
+    /**
+     *  Allows you to set curl specify options, setting CURLOPT_PRIVATE is not
+     *  allowed as we use this internally
+     *
+     *  @see http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
+     *  @return True if succesful, false otherwise
+     */
+    template <class ...Arguments>
+    bool setopt(CURLoption option, Arguments ...parameters)
     {
-        if (_handle)    curl_easy_cleanup(_handle);
+        // If the user is trying to set one of the following options return false, as we use them internally
+        if (option == CURLOPT_PRIVATE) return false;
+
+        // Just redirect everything into curl_easy_setopt
+        return curl_easy_setopt(_builder, option, parameters...) == CURLE_OK;
     }
 
     /**
-     *  Allows you to set curl specify options
-     *
-     *  @see http://curl.haxx.se/libcurl/c/curl_easy_setopt.html
-     *  @return True is succesful, false otherwise
-     */
-    bool setopt(CURLoption option, ...);
-
-    /**
      *  Actually execute the request
-     *  @todo Implement
+     *
+     *  @return DeferredResult     Which you can then use to set callbacks to get the final result
      */
     DeferredResult& execute();
 };
