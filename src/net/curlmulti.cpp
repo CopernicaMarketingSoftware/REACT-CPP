@@ -34,8 +34,13 @@ CurlMulti::~CurlMulti()
     if (_handle) curl_multi_cleanup(_handle);
 }
 
+/**
+ *  This will check if there are curl operations that are finished, if there
+ *  are the callbacks attached to it will be executed and it will be removed
+ */
 void CurlMulti::checkFinished()
 {
+    // Loop through all the handlers of the multi handle
     CURLMsg *msg = nullptr;
     int handlers = 0;
     while ((msg = curl_multi_info_read(_handle, &handlers)))
@@ -45,7 +50,12 @@ void CurlMulti::checkFinished()
             Result *result = nullptr;
             if (curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &result) == CURLE_OK && result != nullptr)
             {
-                result->deferred()->success(*result);
+                // In case we had an error call the failure() callback, success otherwise
+                const char *error = result->error();
+                if (*error) result->deferred()->failure(result->error());
+                else result->deferred()->success(*result);
+
+                // Clean everything up
                 curl_multi_remove_handle(_handle, msg->easy_handle);
                 curl_easy_cleanup(msg->easy_handle);
                 delete result;

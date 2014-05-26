@@ -50,6 +50,11 @@ private:
      */
     std::shared_ptr<CurlMulti> _curl;
 
+    /**
+     *  Buffer for any form of errors
+     */
+    char _error[CURL_ERROR_SIZE];
+
 public:
 
     /**
@@ -77,6 +82,16 @@ public:
      */
     const std::string &headers() const { return _headers; }
 
+    /**
+     *  Retrieve a human readable error
+     *  @return const char*
+     */
+    const char* error() const { return _error; }
+
+    /**
+     *  Return the DeferredResult, mostly useful to get the callbacks
+     *  @return std::shared_ptr<DeferredResult>
+     */
     std::shared_ptr<DeferredResult> deferred() const { return _deferred; }
 };
 

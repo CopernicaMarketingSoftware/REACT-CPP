@@ -36,6 +36,13 @@ Result::Result(CURL *handle, const std::shared_ptr<DeferredResult> &callbacks, C
 : _deferred(callbacks)
 , _curl(curl)
 {
+    // Let's set the first byte of the error buffer to \0 so we can at least check if there is an error
+    _error[0] = '\0';
+
+    // Set the curl error buffer
+    curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, _error);
+
+    // Register our write functions
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, onWrite);
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, &_body);
     curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION, onWrite);
