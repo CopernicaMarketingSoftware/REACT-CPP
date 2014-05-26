@@ -30,6 +30,12 @@ Request::Request(Loop *loop, const std::string &url)
     setopt(CURLOPT_VERBOSE, 1L); // Uncomment this line in case of debugging curl
 }
 
+Request::Request(CurlMulti *multi_handler, const std::string &url)
+: Request(multi_handler->loop(), url)
+{
+    _multi_handler = multi_handler;
+}
+
 /**
  *  Deconstructor
  */
@@ -52,17 +58,22 @@ DeferredResult& Request::execute()
     // create the deferred result
     auto deferred = std::make_shared<DeferredResult>();
 
-    // Create a curl multi object as we need to make the request asynchronous and
-    // hand ownership over to the Result we'll be creating just a bit later
-    CurlMulti *curl = new CurlMulti(_loop);
+    CurlMulti *curl = nullptr;
+
+    // Create a curl multi object if no multi handler is attached to this request
+    // as we need to make the request asynchronous, we'll hand over ownership
+    // to the Result we'll be creating just a bit later
+    if (_multi_handler == nullptr) curl = new CurlMulti(_loop);
 
     // Create a Result for our handle, this is a raw pointer as we are saving it
     // in a cURL structure, which is in C.
     Result *result = new Result(handle, deferred, curl);
 
+    // If curl is null we obviously have a real multi handler, so just assign that for future operations
+    if (curl == nullptr) curl = _multi_handler;
+
     // Assign our result to CURLOPT_PRIVATE
     curl_easy_setopt(handle, CURLOPT_PRIVATE, result);
-
 
     // and add our handle to the multi handler so it will actually start.
     curl->add(handle);

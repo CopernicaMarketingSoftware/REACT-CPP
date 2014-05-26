@@ -75,6 +75,11 @@ public:
     virtual ~CurlMulti();
 
     /**
+     *  Retrieve the event loop of this cURL multi object
+     */
+    Loop *loop() const { return _loop; }
+
+    /**
      *  Casting operator to cast the Curl object to a cURL multi handler, used
      *  to add CURL objects to the multi handler.
      *

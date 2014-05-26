@@ -20,23 +20,31 @@ private:
     /**
      *  The curl handle that we purely use to build the request
      */
-    CURL* _builder;
+    CURL *_builder;
 
     /**
      *  The event loop the request will be made on
      */
     Loop *_loop;
 
+    CurlMulti *_multi_handler = nullptr;
+
 public:
     /**
      *  Constructor
-     *
-     *  @todo Add constructor that accepts some kind of public curl multi object
      *
      *  @param  loop    Event loop
      *  @param  url     Request url
      */
     Request(Loop *loop, const std::string &url);
+
+    /**
+     *  Constructor
+     *
+     *  @param multi_handler   The cURL multi handler
+     *  @param url             Request url
+     */
+    Request(CurlMulti *multi_handler, const std::string &url);
 
     /**
      *  Deconstructor
