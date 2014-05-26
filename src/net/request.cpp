@@ -27,7 +27,7 @@ Request::Request(Loop *loop, const std::string &url)
     setopt(CURLOPT_FOLLOWLOCATION, 1L); // follow any form of redirects automatically
     setopt(CURLOPT_MAXREDIRS, 10L); // limit the amount of redirects to 10 to avoid infinite redirects
     setopt(CURLOPT_NOSIGNAL, 1L);
-    setopt(CURLOPT_VERBOSE, 1L); // Uncomment this line in case of debugging curl
+    //setopt(CURLOPT_VERBOSE, 1L); // Uncomment this line in case of debugging curl
 }
 
 Request::Request(CurlMulti *multi_handler, const std::string &url)
