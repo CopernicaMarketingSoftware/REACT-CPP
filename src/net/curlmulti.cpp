@@ -52,8 +52,20 @@ void CurlMulti::checkFinished()
             {
                 // In case we had an error call the failure() callback, success otherwise
                 const char *error = result->error();
-                if (*error) result->deferred()->failure(result->error());
-                else result->deferred()->success(*result);
+                if (*error) result->_deferred->failure(result->error());
+                else
+                {
+                    // If we are succesful we need some extra data
+                    long status = -1;
+                    CURLcode ret = curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &status);
+                    if (ret == CURLE_OK)
+                    {
+                        // Store this extra data in our result and call the success callback
+                        result->_status_code = (int) status;
+                        result->_deferred->success(*result);
+                    }
+                    else result->_deferred->failure(curl_easy_strerror(ret));
+                }
 
                 // Clean everything up
                 curl_multi_remove_handle(_handle, msg->easy_handle);

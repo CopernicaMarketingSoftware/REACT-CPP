@@ -40,6 +40,12 @@ private:
     std::string _headers;
 
     /**
+     *  Used to store the response code from the remote server
+     *  @see http://curl.haxx.se/libcurl/c/curl_easy_getinfo.html#CURLINFORESPONSECODE
+     */
+    int _status_code;
+
+    /**
      *  Shared pointer to the deferred result, which basically holds the user
      *  specified callbacks
      */
@@ -54,6 +60,11 @@ private:
      *  Buffer for any form of errors
      */
     char _error[CURL_ERROR_SIZE];
+
+    /**
+     *  CurlMulti is a good friend that may touch our internals
+     */
+    friend class CurlMulti;
 
 public:
 
@@ -89,10 +100,10 @@ public:
     const char* error() const { return _error; }
 
     /**
-     *  Return the DeferredResult, mostly useful to get the callbacks
-     *  @return std::shared_ptr<DeferredResult>
+     *  Retrieve the status code of the result
+     *  @return int
      */
-    std::shared_ptr<DeferredResult> deferred() const { return _deferred; }
+    int status() const { return _status_code; }
 };
 
 /**
