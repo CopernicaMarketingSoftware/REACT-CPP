@@ -43,6 +43,7 @@ void CurlMulti::checkFinished()
     // Loop through all the handlers of the multi handle
     CURLMsg *msg = nullptr;
     int handlers = 0;
+
     while ((msg = curl_multi_info_read(_handle, &handlers)))
     {
         if (msg->msg == CURLMSG_DONE)
@@ -52,19 +53,30 @@ void CurlMulti::checkFinished()
             {
                 // In case we had an error call the failure() callback, success otherwise
                 const char *error = result->error();
-                if (*error) result->_deferred->failure(result->error());
+
+                if (*error)
+                {
+                    // Call the failure callback using the error
+                    result->_deferred->failure(error);
+                }
                 else
                 {
                     // If we are succesful we need some extra data
                     long status = -1;
                     CURLcode ret = curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &status);
+
                     if (ret == CURLE_OK)
                     {
                         // Store this extra data in our result and call the success callback
                         result->_status_code = (int) status;
                         result->_deferred->success(*result);
                     }
-                    else result->_deferred->failure(curl_easy_strerror(ret));
+                    else
+                    {
+                        // Call the failure callback with a human readable version of the output of curl_easy_getinfo
+                        // @todo This might fail with protocols that don't send a status code?
+                        result->_deferred->failure(curl_easy_strerror(ret));
+                    }
                 }
 
                 // Clean everything up
@@ -79,10 +91,20 @@ void CurlMulti::checkFinished()
 /**
  *  Callback function for cURL where it'll let us know about file descriptors we have
  *  to add or remove
+ *
+ *  @param  curl_easy     The cURL handle this socket currently belongs to
+ *  @param  fd            The file descriptor to monitor for action
+ *  @param  action        The actions to look out for, this is a bitmask
+ *  @param  userdata      User specified data, we are assuming a CurlMulti* here
+ *  @param  socketpointer A pointer specify to this file descriptor, unused by us
+ *
+ *  @see http://curl.haxx.se/libcurl/c/curl_multi_socket_action.html
  */
 int CurlMulti::setupSocket(CURL *curl_easy, curl_socket_t fd, int action, void *userdata, void *socketpointer)
 {
+    // Cast userdata to a CurlMulti*
     CurlMulti *curl = static_cast<CurlMulti*>(userdata);
+
     if (action == CURL_POLL_REMOVE)
     {
         // look for the file descriptor
@@ -140,6 +162,9 @@ int CurlMulti::setupSocket(CURL *curl_easy, curl_socket_t fd, int action, void *
 
 /**
  *  Callback function for cURL where it'll ask us to tickle it in timeout milliseconds.
+ *  @param  multi     The cURL multi object we need to apply a timeout on
+ *  @param  timeout   The amount of milliseconds we have to wait before tickling multi
+ *  @param  userdata  User specified data, a CurlMulti* in our case
  */
 int CurlMulti::setupTimeout(CURLM *multi, long timeout, void *userdata)
 {

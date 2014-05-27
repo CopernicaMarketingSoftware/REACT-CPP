@@ -71,8 +71,9 @@ public:
     /**
      *  Constructor
      *
-     *  @param  handle The cURL handle to hook into for the results
-     *  @param  curl   CurlMulti object we need to take ownership over
+     *  @param  handle     The cURL handle to hook into for the results
+     *  @param  callbacks  The callbacks to keep tracks of
+     *  @param  curl       CurlMulti object we need to take ownership over
      */
     Result(CURL *handle, const std::shared_ptr<DeferredResult> &callbacks, CurlMulti *curl = nullptr);
 

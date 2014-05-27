@@ -27,6 +27,10 @@ private:
      */
     Loop *_loop;
 
+    /**
+     *  The user specified CurlMulti handler, if this is a nullptr we create a temporary
+     *  one for them
+     */
     CurlMulti *_multi_handler = nullptr;
 
 public:

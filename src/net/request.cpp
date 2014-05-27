@@ -30,6 +30,12 @@ Request::Request(Loop *loop, const std::string &url)
     //setopt(CURLOPT_VERBOSE, 1L); // Uncomment this line in case of debugging curl
 }
 
+/**
+ *  Constructor
+ *
+ *  @param  multi_handler   CurlMulti object to make the requests on
+ *  @param  url             Request url
+ */
 Request::Request(CurlMulti *multi_handler, const std::string &url)
 : Request(multi_handler->loop(), url)
 {

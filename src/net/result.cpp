@@ -14,6 +14,10 @@ namespace React { namespace Curl {
 
 /**
  *  cURL write callback
+ *  @param  data       Pointer to the raw data
+ *  @param  size       The amount of bytes of raw data
+ *  @param  nmemb      The size of the bytes, do size * nmemb for complete size
+ *  @param  userdata   User specified data, send a pointer to a std::string here
  */
 static size_t onWrite(char *data, size_t size, size_t nmemb, void *userdata)
 {
@@ -33,7 +37,8 @@ static size_t onWrite(char *data, size_t size, size_t nmemb, void *userdata)
  *  @param  handle The cURL handle to hook into for the results
  */
 Result::Result(CURL *handle, const std::shared_ptr<DeferredResult> &callbacks, CurlMulti *curl)
-: _deferred(callbacks)
+: _status_code(0)
+, _deferred(callbacks)
 , _curl(curl)
 {
     // Let's set the first byte of the error buffer to \0 so we can at least check if there is an error
