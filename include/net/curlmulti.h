@@ -66,6 +66,8 @@ private:
 public:
     /**
      *  Constructor
+     *
+     *  @param  loop    Event loop
      */
     CurlMulti(Loop *loop);
 

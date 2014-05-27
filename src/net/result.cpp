@@ -34,7 +34,9 @@ static size_t onWrite(char *data, size_t size, size_t nmemb, void *userdata)
 /**
  *  Constructor
  *
- *  @param  handle The cURL handle to hook into for the results
+ *  @param  handle     The cURL handle to hook into for the results
+ *  @param  callbacks  The callbacks to keep tracks of
+ *  @param  curl       CurlMulti object we need to take ownership over
  */
 Result::Result(CURL *handle, const std::shared_ptr<DeferredResult> &callbacks, CurlMulti *curl)
 : _status_code(0)

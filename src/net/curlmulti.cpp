@@ -15,6 +15,8 @@ namespace React { namespace Curl {
 
 /**
  *  Constructor
+ *
+ *  @param  loop         Event loop
  */
 CurlMulti::CurlMulti(Loop* loop)
 : _handle(curl_multi_init())
@@ -49,6 +51,7 @@ void CurlMulti::checkFinished()
         if (msg->msg == CURLMSG_DONE)
         {
             Result *result = nullptr;
+
             if (curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &result) == CURLE_OK && result != nullptr)
             {
                 // In case we had an error call the failure() callback, success otherwise
