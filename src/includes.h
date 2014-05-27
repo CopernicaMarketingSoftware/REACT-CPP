@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <ares.h>
 #include <string.h>
+#include <curl/curl.h>
 #include <memory>
 #include <map>
 #include <set>
@@ -23,6 +24,7 @@
 #include "../include/mainloop.h"
 #include "../include/watcher.h"
 #include "../include/timeval.h"
+#include "../include/deferred.h"
 #include "../include/watchers/read.h"
 #include "../include/watchers/write.h"
 #include "../include/watchers/timeout.h"
@@ -34,6 +36,9 @@
 #include "../include/net/ipv4.h"
 #include "../include/net/ipv6.h"
 #include "../include/net/ip.h"
+#include "../include/net/curlmulti.h"
+#include "../include/net/result.h"
+#include "../include/net/request.h"
 #include "../include/dns/iprecord.h"
 #include "../include/dns/mxrecord.h"
 #include "../include/dns/mxresult.h"
