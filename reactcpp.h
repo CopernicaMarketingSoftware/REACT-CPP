@@ -51,9 +51,6 @@
 #include <reactcpp/net/ipv6.h>
 #include <reactcpp/net/ip.h>
 #include <reactcpp/net/address.h>
-#include <reactcpp/net/curlmulti.h>
-#include <reactcpp/net/result.h>
-#include <reactcpp/net/request.h>
 #include <reactcpp/dns/iprecord.h>
 #include <reactcpp/dns/mxrecord.h>
 #include <reactcpp/dns/mxresult.h>
