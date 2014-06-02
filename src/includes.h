@@ -10,7 +10,6 @@
 #include <arpa/inet.h>
 #include <ares.h>
 #include <string.h>
-#include <curl/curl.h>
 #include <memory>
 #include <map>
 #include <set>
