@@ -43,8 +43,8 @@ public:
      *  You normally don't construct MxRecord objects yourself, but retrieve
      *  them with a call to Resolver::mx().
      * 
-     *  @param  hostname
-     *  @param  priority
+     *  @param  hostname    the hostname that handles incoming mail
+     *  @param  priority    the priority (lower gets priority)
      */
     MxRecord(const char *hostname, int priority) : _hostname(hostname), _priority(priority) {}
 
@@ -82,7 +82,7 @@ public:
     
     /**
      *  Compare two objects
-     *  @param  that
+     *  @param  that    record to compare to
      *  @return bool
      */
     bool operator==(const MxRecord &that) const
@@ -92,7 +92,7 @@ public:
 
     /**
      *  Compare two objects
-     *  @param  that
+     *  @param  that    record to compare to
      *  @return bool
      */
     bool operator!=(const MxRecord &that) const
@@ -102,7 +102,7 @@ public:
     
     /**
      *  Compare two objects
-     *  @param  that
+     *  @param  that    record to compare to
      *  @return bool
      */
     bool operator<(const MxRecord &that) const
@@ -114,7 +114,7 @@ public:
 
     /**
      *  Compare two objects
-     *  @param  that
+     *  @param  that    record to compare to
      *  @return bool
      */
     bool operator>(const MxRecord &that) const
@@ -127,8 +127,8 @@ public:
 
 /**
  *  Function to write a record to a stream
- *  @param  os
- *  @param  ip
+ *  @param  os  stream to write to
+ *  @param  mx  the mx record to display
  *  @return ostream
  */
 inline std::ostream &operator<<(std::ostream &os, const React::Dns::MxRecord &mx)

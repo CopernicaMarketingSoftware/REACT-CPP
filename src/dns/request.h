@@ -19,7 +19,7 @@ class Request
 protected:
     /**
      *  Pointer to the resolver
-     *  @param  Base
+     *  @var Base
      */
     Base *_resolver;
 
@@ -32,7 +32,7 @@ protected:
 
     /**
      *  Constructor
-     *  @param  resolver
+     *  @param  resolver    the resolver object
      */
     Request(Base *resolver) : _resolver(resolver), _channel(resolver->channel()) {}
 

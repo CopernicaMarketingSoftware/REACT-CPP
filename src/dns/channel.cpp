@@ -14,7 +14,7 @@ namespace React { namespace Dns {
 
 /**
  *  Static function that is called on expiration of a timer
- *  @param  channel
+ *  @param  channel the ares channel that the timer expired on
  */
 static void timer_expires(ares_channel channel)
 {

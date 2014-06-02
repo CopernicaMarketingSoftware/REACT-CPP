@@ -30,7 +30,7 @@ public:
 
     /**
      *  Constructor to convert from a ev_tstamp value
-     *  @param  Timestamp
+     *  @param  timestamp   ev_tstamp structure
      */
     Timeval(Timestamp timestamp)
     {

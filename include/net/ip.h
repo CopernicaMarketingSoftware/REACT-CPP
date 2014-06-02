@@ -57,7 +57,7 @@ public:
     
     /**
      *  Constructor based on an other IP address
-     *  @param  ip
+     *  @param  ip  ip address to copy
      */
     Ip(const Ipv4 &ip) : _version(4), _ip(ip) {}
     Ip(const Ipv6 &ip) : _version(6), _ip(ip) {}
@@ -65,7 +65,7 @@ public:
 
     /**
      *  Constructor based on string
-     *  @param  ip
+     *  @param  ip  textual representation of ip address
      */
     Ip(const char *ip) : Ip(Ipv4(ip))
     {
@@ -88,7 +88,7 @@ public:
   
     /**
      *  Assign a different IP
-     *  @param  that
+     *  @param  that    ip address to copy
      *  @return IP
      */
     Ip &operator=(const Ip &that)
@@ -165,7 +165,7 @@ public:
   
     /**
      *  Comparison of two ips
-     *  @param  that
+     *  @param  that    address to compare to
      *  @return bool
      */
     bool operator==(const Ip &that) const
@@ -185,7 +185,7 @@ public:
     
     /**
      *  Comparison of two ips
-     *  @param  that
+     *  @param  that    address to compare to
      *  @return bool
      */
     bool operator!=(const Ip &that) const
@@ -205,7 +205,7 @@ public:
     
     /**
      *  Comparison of two ips
-     *  @param  that
+     *  @param  that    address to compare to
      *  @return bool
      */
     bool operator<(const Ip &that) const
@@ -225,7 +225,7 @@ public:
 
     /**
      *  Comparison of two ips
-     *  @param  that
+     *  @param  that    address to compare to
      *  @return bool
      */
     bool operator>(const Ip &that) const
@@ -246,8 +246,8 @@ public:
 
 /**
  *  Function to write an IP to a stream
- *  @param  os
- *  @param  ip
+ *  @param  os  output stream to write to
+ *  @param  ip  ip address to write
  *  @return ostream
  */
 inline std::ostream &operator<<(std::ostream &os, const Ip &ip)

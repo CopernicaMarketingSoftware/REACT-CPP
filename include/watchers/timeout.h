@@ -49,7 +49,7 @@ private:
 
     /**
      *  Initialize the object
-     *  @param  timeout
+     *  @param  timeout time until invocation
      */
     void initialize(Timestamp timeout);
 
@@ -156,7 +156,7 @@ public:
 
     /**
      *  Set the timer to a new time
-     *  @param  timeout
+     *  @param  timeout new time to invocation
      *  @return bool
      */
     bool set(Timestamp timeout)

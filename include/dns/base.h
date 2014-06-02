@@ -19,7 +19,7 @@ class Base
 protected:
     /**
      *  Constructor
-     *  @param  loop
+     *  @var    Loop
      */
     Base(Loop *loop);
 

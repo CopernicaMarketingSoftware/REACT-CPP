@@ -40,7 +40,7 @@ public:
      *
      *  Create a worker that will execute code from the context of the main thread.
      *
-     *  @param  loop
+     *  @param  loop    event loop where the worker will execute code
      */
     Worker(Loop *loop);
 

@@ -135,7 +135,7 @@ public:
      *  callback can be called. If set to false, it will now wait and immediately
      *  return if no methods can be called
      *
-     *  @param  block
+     *  @param  block   block return until the step was completed
      *  @return bool
      */
     bool step(bool block = true)

@@ -43,8 +43,8 @@ private:
 
     /**
      *  Initialize the object
-     *  @param  initial
-     *  @param  interval
+     *  @param  initial     time to first invocation
+     *  @param  interval    time between invocations
      */
     void initialize(Timestamp initial, Timestamp interval);
 
@@ -173,7 +173,7 @@ public:
 
     /**
      *  Set the timer to a new time
-     *  @param  timeout
+     *  @param  timeout new time before invocation
      *  @return bool
      */
     bool set(Timestamp timeout)

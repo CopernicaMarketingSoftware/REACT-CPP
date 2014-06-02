@@ -43,7 +43,7 @@ private:
 
     /**
      *  Function to initialize the io watcher
-     *  @param  fd
+     *  @param  fd  file descriptor to watch
      */
     void initialize(int fd);
 

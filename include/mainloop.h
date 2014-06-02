@@ -72,7 +72,7 @@ public:
      *  @param  pid         The child PID
      *  @param  trace       If true, the watcher is notified for all status changes, otherwise only exits
      *  @param  callback    Function that is called the moment the child changes status
-     *  @return
+     *  @return             Object that can be used to stop checking for status changes
      */
     std::shared_ptr<StatusWatcher> onStatusChange(pid_t pid, bool trace, const StatusCallback &callback);
     

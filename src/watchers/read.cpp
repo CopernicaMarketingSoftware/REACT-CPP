@@ -12,9 +12,9 @@ namespace React {
 
 /**
  *  Function that gets called when the filedescriptor is active
- *  @param  loop
- *  @param  watcher
- *  @param  events
+ *  @param  loop    the event loop
+ *  @param  watcher the watcher structure
+ *  @param  events  events to monitor
  */
 static void onActive(struct ev_loop *loop, ev_io *watcher, int events)
 {
@@ -38,5 +38,5 @@ void ReadWatcher::initialize(int fd)
 
 /**
  *  End namespace
- */    
+ */
 }

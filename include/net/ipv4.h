@@ -33,7 +33,7 @@ public:
         // set to all zero's
         _addr.s_addr = 0;
     }
-    
+
     /**
      *  Copy constructor
      *  @param  ip      Address that is copied
@@ -43,7 +43,7 @@ public:
         // copy the other address
         _addr.s_addr = ip._addr.s_addr;
     }
-    
+
     /**
      *  Move constructor
      *  @param  ip      Address that is moved
@@ -53,11 +53,11 @@ public:
         // copy the other address
         _addr.s_addr = ip._addr.s_addr;
     }
-    
+
     /**
      *  Assign an IP address based on a string representation of an IP
      *  address. This should be a string in the 1.2.3.4 format.
-     * 
+     *
      *  @param  ip      Address that will be parsed
      */
     Ipv4(const char *ip)
@@ -67,7 +67,7 @@ public:
 
         // parse the address
         if (inet_pton(AF_INET, ip, &_addr) > 0) return;
-        
+
         // not a valid address
         _addr.s_addr = 0;
     }
@@ -75,7 +75,7 @@ public:
     /**
      *  Assign an IP address based on a string representation of an IP
      *  address. This should be a string in the 1.2.3.4 format.
-     * 
+     *
      *  @param  ip      Address that will be parsed
      */
     Ipv4(const std::string &ip)
@@ -85,14 +85,14 @@ public:
 
         // parse the address
         if (inet_pton(AF_INET, ip.c_str(), &_addr) > 0) return;
-        
+
         // not a valid address
         _addr.s_addr = 0;
     }
-    
+
     /**
      *  Constructor with struct in_addr information
-     * 
+     *
      *  @param  ip      IP address
      */
     Ipv4(const struct in_addr ip)
@@ -100,10 +100,10 @@ public:
         // copy the other address
         _addr.s_addr = ip.s_addr;
     }
-    
+
     /**
      *  Constructor with pointer to a struct in_addr
-     * 
+     *
      *  @param  ip      Ip address pointer
      */
     Ipv4(const struct in_addr *ip)
@@ -111,12 +111,12 @@ public:
         // copy the other address
         _addr.s_addr = ip->s_addr;
     }
-    
+
     /**
      *  Destructor
      */
     virtual ~Ipv4() {}
-    
+
     /**
      *  Pointer to the internal address
      *  @return struct in_addr*
@@ -125,7 +125,7 @@ public:
     {
         return &_addr;
     }
-    
+
     /**
      *  Does the object represent a valid IP address?
      *  @return bool
@@ -134,10 +134,10 @@ public:
     {
         return _addr.s_addr != 0;
     }
-    
+
     /**
      *  Assign a different IP address to this object
-     *  @param  ip      The other address
+     *  @param  address The other address
      *  @return Ipv4
      */
     Ipv4 &operator=(const Ipv4 &address)
@@ -149,7 +149,7 @@ public:
 
     /**
      *  Compare two IP addresses
-     *  @param  ip      The address to compare
+     *  @param  address The address to compare
      *  @return bool
      */
     bool operator==(const Ipv4 &address) const
@@ -159,7 +159,7 @@ public:
 
     /**
      *  Compare two IP addresses
-     *  @param  ip      The address to compare
+     *  @param  address The address to compare
      *  @return bool
      */
     bool operator!=(const Ipv4 &address) const
@@ -169,7 +169,7 @@ public:
 
     /**
      *  Compare two IP addresses
-     *  @param  ip      The address to compare
+     *  @param  address The address to compare
      *  @return bool
      */
     bool operator<(const Ipv4 &address) const
@@ -179,7 +179,7 @@ public:
 
     /**
      *  Compare two IP addresses
-     *  @param  ip      The address to compare
+     *  @param  address The address to compare
      *  @return bool
      */
     bool operator>(const Ipv4 &address) const
@@ -195,13 +195,13 @@ public:
     {
         // not valid?
         if (!valid()) return std::string("0.0.0.0");
-        
+
         // construct a buffer
         char buffer[INET_ADDRSTRLEN];
-        
+
         // convert
         inet_ntop(AF_INET, &_addr, buffer, INET_ADDRSTRLEN);
-        
+
         // done
         return std::string(buffer);
     }

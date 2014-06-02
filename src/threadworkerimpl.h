@@ -108,7 +108,7 @@ public:
     /**
      *  Execute a function
      *
-     *  @param  function    the code to execute
+     *  @param  callback    the code to execute
      */
     virtual void execute(const std::function<void()> &callback) override
     {

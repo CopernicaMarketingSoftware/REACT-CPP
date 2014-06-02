@@ -33,7 +33,7 @@ private:
 public:
     /**
      *  Update pending count, and return the new value
-     *  @param  change
+     *  @param  change  number to add to existing pending operations
      *  @return value
      */
     int pending(int change = 0)

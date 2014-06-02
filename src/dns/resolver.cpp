@@ -18,7 +18,7 @@ namespace React { namespace Dns {
  *  @param  buffer  The answer buffer
  *  @param  len     Length of the answer buffer
  */
-static void ipv4callback(void *data, int status, int timeouts, unsigned char *buffer, int len)
+static void ipv4callback(void *data, int status, int timeout, unsigned char *buffer, int len)
 {
     // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
     auto request = static_cast<IpRequest*>(data);
@@ -47,7 +47,7 @@ static void ipv4callback(void *data, int status, int timeouts, unsigned char *bu
  *  @param  buffer  The answer buffer
  *  @param  len     Length of the answer buffer
  */
-static void ipv6callback(void *data, int status, int timeouts, unsigned char *buffer, int len)
+static void ipv6callback(void *data, int status, int timeout, unsigned char *buffer, int len)
 {
     // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
     // auto request = std::unique_ptr<IpRequest>((IpRequest *)data);
@@ -77,7 +77,7 @@ static void ipv6callback(void *data, int status, int timeouts, unsigned char *bu
  *  @param  buffer  The answer buffer
  *  @param  len     Length of the answer buffer
  */
-static void mxcallback(void *data, int status, int timeouts, unsigned char *buffer, int len)
+static void mxcallback(void *data, int status, int timeout, unsigned char *buffer, int len)
 {
     // retrieve pointer to the request (and put it in a unique ptr so that it will be destructed)
     auto request = static_cast<MxRequest*>(data);

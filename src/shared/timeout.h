@@ -33,9 +33,9 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  loop
-     *  @param  timeout
-     *  @param  callback
+     *  @param  loop        Event loop
+     *  @param  timeout     Timeout period
+     *  @param  callback    Function that is called when timer is expired
      */
     SharedTimeoutWatcher(Loop *loop, Timestamp timeout, const TimeoutCallback &callback) : Shared(this), TimeoutWatcher(loop, timeout, callback) {}
     
