@@ -120,7 +120,7 @@ private:
             while (size > 0 && _size > 0)
             {
                 // check the first buffer, is it in total big enough?
-                if (_data[_first].iov_len >= size)
+                if (_data[_first].iov_len <= size)
                 {
                     // the first buffer can be removed in total
                     delete[] _data[_first].iov_base;
@@ -362,10 +362,10 @@ public:
     {
         // result variable
         size_t result = 0;
-        
+
         // loop through the parts
         for (auto &part : _parts) result += part->size();
-        
+
         // done
         return result;
     }
