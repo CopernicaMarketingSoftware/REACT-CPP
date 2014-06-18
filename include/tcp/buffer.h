@@ -33,6 +33,16 @@ private:
         struct iovec _data[CAPACITY];
 
         /**
+         *  First allocated memory block
+         *
+         *  We need to keep this in case we are removing
+         *  a partial iovec structure. We increment the
+         *  data pointer in the structure, but we need to
+         *  retain the original address to free the data
+         */
+        const void *_allocated = nullptr;
+
+        /**
          *  First item that is filled
          *  @var    int
          */
@@ -68,8 +78,12 @@ private:
             // skip if empty
             if (_size == 0) return;
 
+            // delete the first part
+            delete[] _allocated;
+
             // loop through all following buffers
-            for (int i = _first; i < _current; i++) delete[] _data[i].iov_base;
+            // skip first part because we already deleted _allocated
+            for (int i = _first + 1; i < _current; i++) delete[] _data[i].iov_base;
         }
 
         /**
@@ -95,6 +109,10 @@ private:
 
             // update total size
             _size += size;
+
+            // is this the first block? then update the
+            // pointer to be deleted
+            if (_first == _current) _allocated = buffer;
 
             // move current for next call
             _current++;
@@ -123,14 +141,21 @@ private:
                 if (_data[_first].iov_len <= size)
                 {
                     // the first buffer can be removed in total
-                    delete[] _data[_first].iov_base;
+                    delete _allocated;
 
                     // update number of bytes
                     result += _data[_first].iov_len;
                     _size -= _data[_first].iov_len;
+                    size -= _data[_first].iov_len;
 
                     // advance a position
                     ++_first;
+
+                    // if no more vectors exist, there is nothing left to
+                    // delete, otherwise we set the allocated member to the
+                    // next vector that will be deleted
+                    if (_first == _current) _allocated = nullptr;
+                    else _allocated = _data[_first].iov_base;
                 }
                 else
                 {
@@ -141,6 +166,7 @@ private:
                     // update counters
                     result += size;
                     _size -= size;
+                    size -= size;
                 }
             }
 
