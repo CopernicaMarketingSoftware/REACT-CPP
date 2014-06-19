@@ -34,6 +34,7 @@
 #include <reactcpp/exception.h>
 #include <reactcpp/types.h>
 #include <reactcpp/loop.h>
+#include <reactcpp/loopreference.h>
 #include <reactcpp/mainloop.h>
 #include <reactcpp/worker.h>
 #include <reactcpp/watcher.h>
