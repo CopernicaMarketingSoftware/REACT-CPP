@@ -103,8 +103,6 @@ public:
      */
     virtual bool cancel()
     {
-        std::cout << "Cancel!" << std::endl;
-
         // skip if already stopped
         if (!_active) return false;
 
