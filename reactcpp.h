@@ -43,6 +43,7 @@
 #include <reactcpp/watchers/write.h>
 #include <reactcpp/watchers/signal.h>
 #include <reactcpp/watchers/synchronize.h>
+#include <reactcpp/watchers/cleanup.h>
 #include <reactcpp/watchers/timeout.h>
 #include <reactcpp/watchers/interval.h>
 #include <reactcpp/watchers/status.h>

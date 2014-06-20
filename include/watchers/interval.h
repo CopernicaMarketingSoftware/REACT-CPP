@@ -56,10 +56,10 @@ protected:
     {
         // monitor ourselves
         Monitor monitor(this);
-        
+
         // call the callback
         if (_callback() || !monitor.valid()) return;
-        
+
         // cancel the watcher
         cancel();
     }
@@ -85,7 +85,7 @@ public:
         // start the timer
         start();
     }
-    
+
     /**
      *  Simpler constructor
      *  @param  loop        Event loop
@@ -105,19 +105,19 @@ public:
     /**
      *  Destructor
      */
-    virtual ~IntervalWatcher() 
+    virtual ~IntervalWatcher()
     {
         // cancel the timer
         cancel();
     }
-    
+
     /**
      *  No copying or moving
      *  @param  that
      */
     IntervalWatcher &operator=(const IntervalWatcher &that) = delete;
     IntervalWatcher &operator=(IntervalWatcher &&that) = delete;
-    
+
     /**
      *  Start the timer
      *  @return bool
@@ -126,14 +126,14 @@ public:
     {
         // not necessary if already running
         if (_active) return false;
-        
+
         // start the timer
         ev_timer_start(*_loop, &_watcher);
-        
+
         // remember that it is active
         return _active = true;
     }
-    
+
     /**
      *  Cancel the timer
      *  @return bool
@@ -142,13 +142,13 @@ public:
     {
         // not necessary if not already running
         if (!_active) return false;
-        
+
         // stop the timer
         ev_timer_stop(*_loop, &_watcher);
-        
+
         // remember that it is no longer active
         _active = false;
-        
+
         // done
         return true;
     }
@@ -163,10 +163,10 @@ public:
     {
         // cancel current timer
         cancel();
-        
+
         // set the new timer
         ev_timer_set(&_watcher, initial, interval);
-        
+
         // and start the timer
         return start();
     }
@@ -182,8 +182,8 @@ public:
         return set(timeout, timeout);
     }
 
-}; 
- 
+};
+
 /**
  *  End namespace
  */

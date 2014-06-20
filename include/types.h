@@ -19,6 +19,7 @@ class WriteWatcher;
 class TimeoutWatcher;
 class IntervalWatcher;
 class SynchronizeWatcher;
+class CleanupWatcher;
 class SignalWatcher;
 class StatusWatcher;
 
@@ -31,6 +32,7 @@ using WriteCallback = std::function<bool()>;
 using TimeoutCallback = std::function<void()>;
 using IntervalCallback = std::function<bool()>;
 using SynchronizeCallback = std::function<void()>;
+using CleanupCallback = std::function<void()>;
 using SignalCallback = std::function<bool()>;
 using StatusCallback = std::function<bool(pid_t,int)>;
 

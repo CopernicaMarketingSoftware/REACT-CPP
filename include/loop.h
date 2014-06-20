@@ -12,14 +12,6 @@
 namespace React {
 
 /**
- *  Forward declarations
- */
-namespace Curl {
-    class Curl; // This is an internal class though :(
-    class Request;
-}
-
-/**
  *  Class definition
  */
 class Loop
@@ -288,6 +280,16 @@ public:
      *  @return             Object that can be used to stop watching, or to synchronize
      */
     std::shared_ptr<SynchronizeWatcher> onSynchronize(const SynchronizeCallback &callback);
+
+    /**
+     *  Register a cleanup function
+     *
+     *  This method takes a callback to be executed right before the event loop
+     *  gets destroyed.
+     *
+     *  @param  callback    Function to invoke before destroying the loop
+     */
+    std::shared_ptr<CleanupWatcher> onCleanup(const CleanupCallback &callback);
 };
 
 /**
