@@ -141,7 +141,7 @@ private:
                 if (_data[_first].iov_len <= size)
                 {
                     // the first buffer can be removed in total
-                    delete _allocated;
+                    delete[] _allocated;
 
                     // update number of bytes
                     result += _data[_first].iov_len;
