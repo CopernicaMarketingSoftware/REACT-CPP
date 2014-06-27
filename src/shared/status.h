@@ -35,10 +35,10 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  loop
-     *  @param  pid
-     *  @param  trace
-     *  @param  callback
+     *  @param  loop        Event loop
+     *  @param  pid         The PID to watch
+     *  @param  trace       Should the watcher be called for all status changes (true) or only for exits (false)
+     *  @param  callback    Function that is called when status changes
      */
     SharedStatusWatcher(MainLoop *loop, pid_t pid, bool trace, const StatusCallback &callback) : Shared(this), StatusWatcher(loop, pid, trace, callback) {}
     

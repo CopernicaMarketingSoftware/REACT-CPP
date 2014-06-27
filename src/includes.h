@@ -10,7 +10,6 @@
 #include <arpa/inet.h>
 #include <ares.h>
 #include <string.h>
-#include <curl/curl.h>
 #include <memory>
 #include <map>
 #include <set>
@@ -30,6 +29,7 @@
 #include "../include/watchers/timeout.h"
 #include "../include/watchers/interval.h"
 #include "../include/watchers/synchronize.h"
+#include "../include/watchers/cleanup.h"
 #include "../include/watchers/signal.h"
 #include "../include/watchers/status.h"
 #include "../include/worker.h"
@@ -53,6 +53,7 @@
 #include "shared/interval.h"
 #include "shared/signal.h"
 #include "shared/status.h"
+#include "shared/cleanup.h"
 #include "dns/request.h"
 #include "dns/iprequest.h"
 #include "dns/mxrequest.h"

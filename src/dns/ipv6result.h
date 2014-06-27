@@ -20,7 +20,7 @@ public:
     /**
      *  Constructor
      *  @param  buffer      Received data
-     *  @param  int         qqSize of the data
+     *  @param  len         qqSize of the data
      */
     Ipv6Result(const unsigned char *buffer, int len)
     {

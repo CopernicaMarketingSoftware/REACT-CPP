@@ -32,7 +32,7 @@ public:
         // set to zero's
         memset(&_addr, 0, sizeof(struct in6_addr));
     }
-    
+
     /**
      *  Copy constructor
      *  @param  ip      Address to copy
@@ -42,7 +42,7 @@ public:
         // copy address
         memcpy(&_addr, &ip._addr, sizeof(struct in6_addr));
     }
-    
+
     /**
      *  Move operator
      *  @param  ip      Address to copy
@@ -52,7 +52,7 @@ public:
         // copy address
         memcpy(&_addr, &ip._addr, sizeof(struct in6_addr));
     }
-    
+
     /**
      *  Construct from a string representation
      *  @param  ip      String representation
@@ -78,7 +78,7 @@ public:
         // failure, set to zero
         memset(&_addr, 0, sizeof(struct in6_addr));
     }
-    
+
     /**
      *  Construct from a struct in6_addr object
      *  @param  ip      in6_addr storage
@@ -88,7 +88,7 @@ public:
         // copy address
         memcpy(&_addr, &ip, sizeof(struct in6_addr));
     }
-    
+
     /**
      *  Construct from a pointer to a struct in6_addr object
      *  @param  ip      in6_addr storage
@@ -98,7 +98,7 @@ public:
         // copy address
         memcpy(&_addr, ip, sizeof(struct in6_addr));
     }
-    
+
     /**
      *  Constructor based on ares ipv6 structure
      *  @param  ip      ares_in6_addr storage
@@ -108,7 +108,7 @@ public:
         // copy address just as if it was an in6_addr
         memcpy(&_addr, &ip, sizeof(struct in6_addr));
     }
-    
+
     /**
      *  Constructor based on ares ipv6 structure
      *  @param  ip      ares_in6_addr storage
@@ -118,7 +118,7 @@ public:
         // copy address just as if it was an in6_addr
         memcpy(&_addr, ip, sizeof(struct in6_addr));
     }
-    
+
     /**
      *  Destructor
      */
@@ -132,7 +132,7 @@ public:
     {
         return &_addr;
     }
-    
+
     /**
      *  Is this address valid?
      *  @return bool
@@ -141,21 +141,21 @@ public:
     {
         // construct invalid address
         Ipv6 invalid;
-        
+
         // compare if equal to invalid
         return memcmp(&_addr, &invalid._addr, sizeof(struct in6_addr)) != 0;
     }
-    
+
     /**
      *  Assign a different IP address to this object
-     *  @param  ip      The other address
+     *  @param  address The other address
      *  @return Ipv6
      */
     Ipv6 &operator=(const Ipv6 &address)
     {
         // skip identicals
         if (&address == this) return *this;
-    
+
         // copy address
         memcpy(&_addr, &address._addr, sizeof(struct in6_addr));
 
@@ -165,7 +165,7 @@ public:
 
     /**
      *  Compare two IP addresses
-     *  @param  ip      The address to compare
+     *  @param  address The address to compare
      *  @return bool
      */
     bool operator==(const Ipv6 &address) const
@@ -176,7 +176,7 @@ public:
 
     /**
      *  Compare two IP addresses
-     *  @param  ip      The address to compare
+     *  @param  address The address to compare
      *  @return bool
      */
     bool operator!=(const Ipv6 &address) const
@@ -187,7 +187,7 @@ public:
 
     /**
      *  Compare two IP addresses
-     *  @param  ip      The address to compare
+     *  @param  address The address to compare
      *  @return bool
      */
     bool operator<(const Ipv6 &address) const
@@ -198,7 +198,7 @@ public:
 
     /**
      *  Compare two IP addresses
-     *  @param  ip      The address to compare
+     *  @param  address The address to compare
      *  @return bool
      */
     bool operator>(const Ipv6 &address) const
@@ -215,13 +215,13 @@ public:
     {
         // not valid?
         if (!valid()) return std::string("::");
-        
+
         // construct a buffer
         char buffer[INET6_ADDRSTRLEN];
-        
+
         // convert
         inet_ntop(AF_INET6, &_addr, buffer, INET6_ADDRSTRLEN);
-        
+
         // done
         return std::string(buffer);
     }

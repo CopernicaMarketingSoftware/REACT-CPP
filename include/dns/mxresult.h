@@ -25,7 +25,7 @@ public:
     /**
      *  Constructor
      *  @param  buffer      Received data
-     *  @param  int         qqSize of the data
+     *  @param  len         qqSize of the data
      */
     MxResult(const unsigned char *buffer, int len)
     {

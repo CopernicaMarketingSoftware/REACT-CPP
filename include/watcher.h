@@ -32,7 +32,7 @@ protected:
     public:
         /**
          *  Constructor
-         *  @param  watcher
+         *  @param  watcher the watcher to monitor for destruction
          */
         Monitor(Watcher *watcher) : _watcher(watcher)
         {

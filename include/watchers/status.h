@@ -43,8 +43,8 @@ private:
 
     /**
      *  Initialize the object
-     *  @param  pid
-     *  @param  trace
+     *  @param  pid     The PID to watch
+     *  @param  trace   Should the watcher be called for all status changes (true) or only for exits (false)
      */
     void initialize(pid_t pid, bool trace);
 

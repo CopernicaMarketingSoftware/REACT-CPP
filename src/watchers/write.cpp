@@ -12,9 +12,9 @@ namespace React {
 
 /**
  *  Function that gets called when the filedescriptor is active
- *  @param  loop
- *  @param  watcher
- *  @param  events
+ *  @param  loop    underlying libev loop
+ *  @param  watcher libev io structure
+ *  @param  events  events happening on the file descriptor
  */
 static void onActive(struct ev_loop *loop, ev_io *watcher, int events)
 {
@@ -27,7 +27,7 @@ static void onActive(struct ev_loop *loop, ev_io *watcher, int events)
 
 /**
  *  Initialize
- *  @param  fd
+ *  @param  fd  file descriptor to monitor for writability
  */
 void WriteWatcher::initialize(int fd)
 {

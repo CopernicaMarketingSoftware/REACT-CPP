@@ -35,10 +35,10 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  loop
-     *  @param  initial
-     *  @param  interval
-     *  @param  callback
+     *  @param  loop        Event loop
+     *  @param  initial     Initial timeout
+     *  @param  interval    Timeout interval period
+     *  @param  callback    Function that is called when timer is expired
      */
     SharedIntervalWatcher(Loop *loop, Timestamp initial, Timestamp interval, const IntervalCallback &callback) : Shared(this), IntervalWatcher(loop, initial, interval, callback) {}
     

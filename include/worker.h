@@ -9,6 +9,10 @@
  *  object passed to the constructor. If no loop is provided, a thread
  *  is started to execute code that is not supposed to block the main thread.
  *
+ *  Please note that the worker will not keep the loop active, if there
+ *  is nothing else keeping the loop running, you will need to add a
+ *  reference using ev_ref.
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -40,7 +44,7 @@ public:
      *
      *  Create a worker that will execute code from the context of the main thread.
      *
-     *  @param  loop
+     *  @param  loop    event loop where the worker will execute code
      */
     Worker(Loop *loop);
 

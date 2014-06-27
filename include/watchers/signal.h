@@ -43,7 +43,7 @@ private:
 
     /**
      *  Initialize the object
-     *  @param  signum
+     *  @param  signum  signal number
      */
     void initialize(int signum);
 

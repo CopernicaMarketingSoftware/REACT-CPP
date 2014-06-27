@@ -17,6 +17,11 @@ namespace React {
 class LoopWorkerImpl : public WorkerImpl
 {
     /**
+     *  The loop in which we run
+     */
+    Loop *_loop;
+
+    /**
      *  The watcher to synchronize with the main thread
      *  @var    SynchronizeWatcher
      */
@@ -69,17 +74,30 @@ public:
      *
      *  @param  loop    loop to execute code in
      */
-    LoopWorkerImpl(Loop *loop) : _watcher(loop, std::bind(&LoopWorkerImpl::run, this)) {}
+    LoopWorkerImpl(Loop *loop) :
+        _loop(loop),
+        _watcher(loop, std::bind(&LoopWorkerImpl::run, this))
+    {
+        // the synchronize watcher has just added a reference
+        // to the loop, keeping it active, which we don't want
+        ev_unref(*_loop);
+    }
 
     /**
      *  Destructor
      */
-    virtual ~LoopWorkerImpl() {}
+    virtual ~LoopWorkerImpl()
+    {
+        // the watcher will remove a reference from the loop
+        // that we already removed, so we add one now to keep
+        // the total balance equal
+        ev_ref(*_loop);
+    }
 
     /**
      *  Execute a function
      *
-     *  @param  function    the code to execute
+     *  @param  callback    the code to execute
      */
     virtual void execute(const std::function<void()> &callback) override
     {

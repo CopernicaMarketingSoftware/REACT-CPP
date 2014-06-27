@@ -20,10 +20,10 @@ std::shared_ptr<ReadWatcher> Loop::onReadable(int fd, const ReadCallback &callba
 {
     // check if callback is valid
     if (!callback) return nullptr;
-    
+
     // create self-destructing implementation object
     auto *reader = new SharedReadWatcher(this, fd, callback);
-    
+
     // done
     return reader->pointer();
 }
@@ -41,7 +41,7 @@ std::shared_ptr<WriteWatcher> Loop::onWritable(int fd, const WriteCallback &call
 
     // create self-destructing implementation object
     auto *writer = new SharedWriteWatcher(this, fd, callback);
-    
+
     // done
     return writer->pointer();
 }
@@ -59,7 +59,7 @@ std::shared_ptr<TimeoutWatcher> Loop::onTimeout(Timestamp timeout, const Timeout
 
     // create self-destructing implementation object
     auto *timer = new SharedTimeoutWatcher(this, timeout, callback);
-    
+
     // done
     return timer->pointer();
 }
@@ -78,14 +78,14 @@ std::shared_ptr<IntervalWatcher> Loop::onInterval(Timestamp initial, Timestamp t
 
     // create self-destructing implementation object
     auto *interval = new SharedIntervalWatcher(this, initial, timeout, callback);
-    
+
     // done
     return interval->pointer();
 }
 
 /**
  *  Register a synchronize function
- *  @param  callback    The callback that is called 
+ *  @param  callback    The callback that is called
  *  @return             Object that can be used to stop watching, or to synchronize
  */
 std::shared_ptr<SynchronizeWatcher> Loop::onSynchronize(const SynchronizeCallback &callback)
@@ -93,11 +93,28 @@ std::shared_ptr<SynchronizeWatcher> Loop::onSynchronize(const SynchronizeCallbac
     // check if callback is valid
     if (!callback) return nullptr;
 
-    // create implementation object
-    auto *synchronizer = new SynchronizeWatcher(this, callback);
-    
-    // done, wrap in a shared pointer
-    return std::shared_ptr<SynchronizeWatcher>(synchronizer);
+    // create the watcher
+    return std::make_shared<SynchronizeWatcher>(this, callback);
+}
+
+/**
+ *  Register a cleanup function
+ *
+ *  This method takes a callback to be executed right before the event loop
+ *  gets destroyed.
+ *
+ *  @param  callback    Function to invoke before destroying the loop
+ */
+std::shared_ptr<CleanupWatcher> Loop::onCleanup(const CleanupCallback &callback)
+{
+    // check if callback is valid
+    if (!callback) return nullptr;
+
+    // create self-destructing implementation object
+    auto *cleanup = new SharedCleanupWatcher(this, callback);
+
+    // done
+    return cleanup->pointer();
 }
 
 /**

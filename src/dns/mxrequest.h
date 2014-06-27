@@ -26,8 +26,8 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  resolver
-     *  @param  callback
+     *  @param  resolver    the resolver object
+     *  @param  callback    the callback to invoke on completion
      */
     MxRequest(Base *resolver, const MxCallback &callback) : 
         Request(resolver), _callback(callback) {}

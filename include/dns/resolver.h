@@ -30,7 +30,7 @@ public:
      *  Find all IP addresses for a certain domain
      *  @param  domain      The domain to fetch the IPs for
      *  @param  version     IP version, can be 4 or 6
-     *  @param  callback
+     *  @param  callback    callback to invoke when the operation completes
      *  @return bool
      */
     bool ip(const std::string &domain, int version, const IpCallback &callback);
@@ -39,7 +39,7 @@ public:
      *  Find all IP addresses for a certain domain
      *  This method fetches all IPs, no matter the version, both Ipv4 and Ipv6
      *  @param  domain      The domain to fetch the IPs for
-     *  @param  callback
+     *  @param  callback    callback to invoke when the operation completes
      *  @return bool
      */
     bool ip(const std::string &domain, const IpCallback &callback);

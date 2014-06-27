@@ -37,7 +37,7 @@ public:
      *  You normally don't construct IpRecord objects yourself, but retrieve
      *  them with a call to Resolver::ips().
      * 
-     *  @param  struct ares_addrttl
+     *  @param  addr    address and time-to-live
      */
     IpRecord(struct ares_addrttl *addr) : _ip(addr->ipaddr), _ttl(addr->ttl) {}
 
@@ -47,7 +47,7 @@ public:
      *  You normally don't construct IpRecord objects yourself, but retrieve
      *  them with a call to Resolver::ips().
      * 
-     *  @param  struct ares_addr6ttl
+     *  @param  addr    address and time-to-live
      */
     IpRecord(struct ares_addr6ttl *addr) : _ip(addr->ip6addr), _ttl(addr->ttl) {}
     
@@ -76,7 +76,7 @@ public:
     
     /**
      *  Compare two objects
-     *  @param  that
+     *  @param  that    address to compare to
      *  @return bool
      */
     bool operator==(const IpRecord &that) const
@@ -86,7 +86,7 @@ public:
 
     /**
      *  Compare two objects
-     *  @param  that
+     *  @param  that    address to compare to
      *  @return bool
      */
     bool operator!=(const IpRecord &that) const
@@ -96,7 +96,7 @@ public:
     
     /**
      *  Compare two objects
-     *  @param  that
+     *  @param  that    address to compare to
      *  @return bool
      */
     bool operator<(const IpRecord &that) const
@@ -106,7 +106,7 @@ public:
 
     /**
      *  Compare two objects
-     *  @param  that
+     *  @param  that    address to compare to
      *  @return bool
      */
     bool operator>(const IpRecord &that) const
@@ -117,8 +117,8 @@ public:
 
 /**
  *  Function to write an IP to a stream
- *  @param  os
- *  @param  ip
+ *  @param  os  output stream to write to
+ *  @param  ip  ip address to write
  *  @return ostream
  */
 inline std::ostream &operator<<(std::ostream &os, const React::Dns::IpRecord &ip)
