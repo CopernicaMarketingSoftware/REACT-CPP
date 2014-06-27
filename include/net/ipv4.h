@@ -100,6 +100,14 @@ public:
         // copy the other address
         _addr.s_addr = ip.s_addr;
     }
+
+    /**
+     *  Constructor that accepts an ipv4 address encoded as an unsigned 32 bit integer
+     */
+    Ipv4(uint32_t ip)
+    {
+        _addr.s_addr = ip;
+    }
     
     /**
      *  Constructor with pointer to a struct in_addr
