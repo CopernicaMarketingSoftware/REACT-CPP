@@ -60,7 +60,9 @@ public:
      *  @param  ip  ip address to copy
      */
     Ip(const Ipv4 &ip) : _version(4), _ip(ip) {}
+    Ip(Ipv4 &&ip) : _version(4), _ip(std::move(ip)) {}
     Ip(const Ipv6 &ip) : _version(6), _ip(ip) {}
+    Ip(Ipv6 &&ip) : _version(6), _ip(std::move(ip)) {}
     Ip(const Ip &ip) : _version(ip._version), _ip(ip) {}
 
     /**
