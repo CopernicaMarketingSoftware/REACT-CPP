@@ -120,6 +120,16 @@ public:
     }
 
     /**
+     *  Constructor that accepts a ipv6 address encoded as a uint128_t, do note that
+     *  this will NOT take care of the host byte order to network byte order for you
+     *  you will have to do this yourself for now!
+     */
+    Ipv6(uint128_t ip)
+    {
+        memcpy(&_addr, &ip, sizeof(uint128_t));
+    }
+
+    /**
      *  Destructor
      */
     virtual ~Ipv6() {}

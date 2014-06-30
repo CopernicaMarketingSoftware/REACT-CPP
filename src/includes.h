@@ -24,6 +24,7 @@
 #include "../include/watcher.h"
 #include "../include/timeval.h"
 #include "../include/deferred.h"
+#include "../include/uint128_t.h"
 #include "../include/watchers/read.h"
 #include "../include/watchers/write.h"
 #include "../include/watchers/timeout.h"
