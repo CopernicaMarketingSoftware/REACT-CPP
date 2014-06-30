@@ -6,6 +6,8 @@
  *  @copyright 2014 Copernica BV
  */
 
+#include <netinet/in.h>
+
 /**
  *  Namespace
  */
@@ -97,7 +99,7 @@ public:
      */
     Ipv4(uint32_t ip)
     {
-        _addr.s_addr = ip;
+        _addr.s_addr = htonl(ip);
     }
 
     /**
