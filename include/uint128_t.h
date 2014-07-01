@@ -33,7 +33,12 @@ to do a general rewrite of this class.
 #pragma once
 
 #ifdef __SIZEOF_INT128__
-  using uint128_t = __uint128_t;
+
+/**
+ *  Typedef the gcc extension for uint128 to uint128_t
+ */
+using uint128_t = __uint128_t;
+
 #else
 
 #include <iostream>
@@ -386,3 +391,18 @@ template <typename T> T & operator%=(T & lhs, const uint128_t & rhs){
 std::ostream & operator<<(std::ostream & stream, const uint128_t & rhs);
 
 #endif // __SIZEOF_INT128__
+
+/**
+ *  Specialized method to swap the endianness on this platform
+ */
+uint128_t swap_endianness(uint128_t i128);
+
+/**
+ *  Switch from host byte order to network byte order
+ */
+uint128_t htonl128(uint128_t ui128);
+
+/**
+ *  Switch from network byte order to host byte order
+ */
+uint128_t ntohl128(uint128_t ui128);

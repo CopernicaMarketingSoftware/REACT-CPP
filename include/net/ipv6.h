@@ -120,13 +120,13 @@ public:
     }
 
     /**
-     *  Constructor that accepts a ipv6 address encoded as a uint128_t, do note that
-     *  this will NOT take care of the host byte order to network byte order for you
-     *  you will have to do this yourself for now!
+     *  Constructor that accepts a ipv6 address encoded as a uint128_t.
      */
     Ipv6(uint128_t ip)
     {
-        memcpy(&_addr, &ip, sizeof(uint128_t));
+        // Swap the endianness, we'll let our htonl128 method deal with this
+        uint128_t swapped = htonl128(ip);
+        memcpy(&_addr, &swapped, sizeof(uint128_t));
     }
 
     /**
