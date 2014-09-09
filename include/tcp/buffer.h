@@ -79,11 +79,11 @@ private:
             if (_size == 0) return;
 
             // delete the first part
-            delete[] _allocated;
+            free(_allocated);
 
             // loop through all following buffers
             // skip first part because we already deleted _allocated
-            for (int i = _first + 1; i < _current; i++) delete[] _data[i].iov_base;
+            for (int i = _first + 1; i < _current; i++) free(_data[i].iov_base);
         }
 
         /**
@@ -97,11 +97,11 @@ private:
             // skip if capacity has been reached
             if (_current >= CAPACITY) return 0;
 
-            // allocate data
-            const char *buffer = new char[size];
+            // allocate a buffer
+            auto *buffer = malloc(size);
 
             // allocate data in last element
-            _data[_current].iov_base = (void *)buffer;
+            _data[_current].iov_base = buffer;
             _data[_current].iov_len = size;
 
             // copy data
@@ -141,7 +141,7 @@ private:
                 if (_data[_first].iov_len <= size)
                 {
                     // the first buffer can be removed in total
-                    delete[] _allocated;
+                    free(_allocated);
 
                     // update number of bytes
                     result += _data[_first].iov_len;
