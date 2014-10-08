@@ -40,7 +40,7 @@ private:
          *  data pointer in the structure, but we need to
          *  retain the original address to free the data
          */
-        const void *_allocated = nullptr;
+        void *_allocated = nullptr;
 
         /**
          *  First item that is filled
