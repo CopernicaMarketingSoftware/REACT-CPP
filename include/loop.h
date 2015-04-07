@@ -24,25 +24,50 @@ private:
     struct ev_loop *_loop = nullptr;
 
     /**
-     *  Is the loop already running?
-     *  @var    bool
+     *  Did we allocate the loop ourselves?
+     *  @var    boolean
      */
-    bool _running = false;
+    bool _allocated;
+
+    /**
+     *  Is the loop currently running?
+     *
+     *  This returns true when Loop.run() was called and has not returned
+     *  yet. In practice means this method will only ever return true from
+     *  a callback function.
+     *
+     *  @return boolean
+     */
+    inline bool running()
+    {
+#if EV_VERSION_MAJOR == 3
+        // libev has a different function name
+        return ev_loop_depth(_loop);
+#else
+        // normal libev call to check recursion level
+        return ev_depth(_loop);
+#endif
+    }
 
 protected:
-    /**
-     *  Protected constructor to wrap around an already allocated loop
-     *  @var    struct ev_loop
-     */
-    Loop(struct ev_loop *loop)
-    : _loop(loop) {}
 
 public:
     /**
      *  Constructor
      */
     Loop()
-    : _loop(ev_loop_new(EVFLAG_AUTO)) {}
+    : _loop(ev_loop_new(EVFLAG_AUTO)), _allocated(true) {}
+
+    /**
+     *  Constructor around an existing loop.
+     *
+     *  Note that in this case we do not "manage" the loop,
+     *  will not try to free it when we fall out of scope and
+     *  that it is your job to make sure it stays valid until
+     *  after this object was destructed.
+     */
+    Loop(struct ev_loop *loop)
+    : _loop(loop), _allocated(false) {}
 
     /**
      *  We cannot be copied
@@ -57,7 +82,11 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Loop() { ev_loop_destroy(_loop); }
+    virtual ~Loop()
+    {
+        // only if we allocated the loop ourselves do we destroy it
+        if (_allocated) ev_loop_destroy(_loop);
+    }
 
     /**
      *  Casting operator to cast the loop object to the internal libev
@@ -99,10 +128,7 @@ public:
     bool run()
     {
         // not possible if already running
-        if (_running) return false;
-
-        // now we are running
-        _running = true;
+        if (running()) return false;
 
 #if EV_VERSION_MAJOR == 3
         // start running for old libev library version
@@ -124,7 +150,7 @@ public:
      *
      *  With the boolean parameter you can specify if the operation should block
      *  or not. If you set it to true, the method will wait until at least one
-     *  callback can be called. If set to false, it will now wait and immediately
+     *  callback can be called. If set to false, it will not wait and immediately
      *  return if no methods can be called
      *
      *  @param  block   block return until the step was completed
@@ -133,7 +159,7 @@ public:
     bool step(bool block = true)
     {
         // not possible when already running
-        if (_running) return false;
+        if (running()) return false;
 
 #if EV_VERSION_MAJOR == 3
         // old version
@@ -158,7 +184,7 @@ public:
     bool stop()
     {
         // must be running
-        if (!_running) return false;
+        if (!running()) return false;
 
 #if EV_VERSION_MAJOR == 3
         // old version
@@ -167,8 +193,6 @@ public:
         // new version
         ev_break(_loop, EVBREAK_ONE);
 #endif
-        // remember that loop is no longer running
-        _running = false;
 
         // done
         return true;
