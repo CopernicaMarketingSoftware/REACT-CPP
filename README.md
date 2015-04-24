@@ -6,6 +6,19 @@ to notify you when there is activity on a filedescriptor or on a timer.
 Internally, it is a wrapper around the libev library, and does therefore also
 depend on that library.
 
+ABOUT
+=====
+
+The REACT-CPP library is created and maintained by Copernica (www.copernica.com). 
+Do you appreciate our work and are you looking for other high quality solutions? 
+Then check out our other solutions:
+
+* PHP-CPP (www.php-cpp.com)
+* PHP-JS (www.php-js.com)
+* Copernica Marketing Suite (www.copernica.com)
+* MailerQ MTA (www.mailerq.com)
+* Responsive Email web service (www.responsiveemail.com)
+
 
 EVENT LOOP
 ==========
