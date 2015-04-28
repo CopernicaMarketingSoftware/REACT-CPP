@@ -48,6 +48,7 @@
 #include <reactcpp/watchers/timeout.h>
 #include <reactcpp/watchers/interval.h>
 #include <reactcpp/watchers/status.h>
+#include <reactcpp/process.h>
 #include <reactcpp/fd.h>
 #include <reactcpp/net/ipv4.h>
 #include <reactcpp/net/ipv6.h>

@@ -1,15 +1,18 @@
-CPP		= g++
-RM		= rm -f
-CPPFLAGS	= -Wall -c -I. -O2 -flto -std=c++11 -g
-LD		= g++
-LD_FLAGS	= -Wall -shared -O2
-SHARED_LIB	= libreactcpp.so
-STATIC_LIB	= $(SHARED_LIB:%.so=%.a)
-SOURCES		= $(wildcard *.cpp */*.cpp)
+CPP		        = g++
+RM		        = rm -f
+CPPFLAGS	    = -Wall -MMD -c -I. -O2 -flto -std=c++11 -g
+LD		        = g++
+LD_FLAGS	    = -Wall -shared -O2
+SHARED_LIB	    = libreactcpp.so
+STATIC_LIB	    = $(SHARED_LIB:%.so=%.a)
+SOURCES		    = $(wildcard *.cpp */*.cpp)
+DEPENDENCIES    = $(SOURCES:%.cpp=%.d)
 SHARED_OBJECTS	= $(SOURCES:%.cpp=%.o)
 STATIC_OBJECTS	= $(SOURCES:%.cpp=%.s.o)
 
 all:	shared static
+
+-include ${DEPENDENCIES}
 
 shared:	${SHARED_OBJECTS} ${SHARED_LIB}
 

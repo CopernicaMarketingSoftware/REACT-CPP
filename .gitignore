@@ -3,6 +3,9 @@
 *.lo
 *.o
 
+# Dependency tracking files
+*.d
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
