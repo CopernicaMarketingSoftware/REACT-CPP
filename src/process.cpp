@@ -7,6 +7,7 @@
  *  @copyright 2015 Copernica B.V.
  */
 #include "includes.h"
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
@@ -22,22 +23,20 @@ namespace React {
  *  @param  program     The program to execute
  *  @param  arguments   Null-terminated array of arguments
  */
-Process::Process(MainLoop *loop, const std::function<void()> &callback, const char *program, const char *arguments[]) :
+Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
     _loop(loop),
-    _callback(callback),
-    _watcher(loop, SIGCHLD, std::bind(&Process::onSignal, this))
+    _stdin(_loop),
+    _stdout(_loop),
+    _stderr(_loop),
+    _pid(fork()),
+    _watcher(loop, _pid, true, [this](pid_t pid, int state) {
+        // execute the callback if it is set
+        if (_callback) _callback(state);
+
+        // keep monitoring until the process has exited
+        return _running && !waitpid(pid, nullptr, WNOHANG);
+    })
 {
-    // we need to keep the loop running until the program has finished
-    ev_ref(*_loop);
-
-    // initialize the pipes
-    if (pipe(_stdin))   throw std::runtime_error(strerror(errno));
-    if (pipe(_stdout))  throw std::runtime_error(strerror(errno));
-    if (pipe(_stderr))  throw std::runtime_error(strerror(errno));
-
-    // fork before executing the process
-    _pid = fork();
-
     // did the fork succeed?
     if (_pid < 0)
     {
@@ -47,23 +46,21 @@ Process::Process(MainLoop *loop, const std::function<void()> &callback, const ch
     // are we running in the main process
     else if (_pid)
     {
-        // close the child part of the pipes
-        close(_stdin[1]);
-        close(_stdout[1]);
-        close(_stderr[1]);
+        // declare our intentions with the pipes
+        _stdin.write();
+        _stdout.read();
+        _stderr.read();
+
+        // we now consider the process to be running
+        _running = true;
     }
     // or the child process
     else
     {
-        // close the master part of the pipes
-        close(_stdin[0]);
-        close(_stdout[0]);
-        close(_stderr[0]);
-
         // use the provided pipes for stdin, stdout and stderr
-        dup2(_stdin[1], STDIN_FILENO);
-        dup2(_stdout[1], STDOUT_FILENO);
-        dup2(_stderr[1], STDERR_FILENO);
+        dup2(_stdin.read().fd(),   STDIN_FILENO);
+        dup2(_stdout.write().fd(), STDOUT_FILENO);
+        dup2(_stderr.write().fd(), STDERR_FILENO);
 
         // execute the requested program
         execvp(program, const_cast<char **>(arguments));
@@ -75,32 +72,36 @@ Process::Process(MainLoop *loop, const std::function<void()> &callback, const ch
  */
 Process::~Process()
 {
-    // close our side of the pipes
-    close(_stdin[0]);
-    close(_stdout[0]);
-    close(_stderr[0]);
+    // if we are not currently running we do not have to do anything
+    if (!_running) return;
+
+    // we are now stopping
+    _running = false;
+
+    // send a term signal to the child
+    kill(_pid, SIGTERM);
+
+    // wait for the child to exit gracefully
+    waitpid(_pid, nullptr, 0);
 }
 
 /**
- *  Handle SIGCHLD signals
+ *  Register a handler for status changes
  *
- *  @return Do we continue watching for signals?
+ *  Note that if you had already registered a handler before, then that one
+ *  will be reset. Only your new handler will be called when the child process
+ *  changes state.
+ *
+ *  The callback will be invoked with a single parameter named 'status'. For
+ *  more information on the meaning of this parameter, see the manual for
+ *  waitpid(2) or sys/wait.h
+ *
+ *  @param  callback    The callback to invoke when the process changes state
  */
-bool Process::onSignal()
+void Process::onStatusChange(const std::function<void(int status)> &callback)
 {
-    // waitpid returns non-zero when our child has now exited
-    // which is exactly when we want to stop monitoring
-    if (!waitpid(_pid, nullptr, WNOHANG)) return true;
-
-    // the program has finished, the loop may now stop
-    // if we were the only ones keeping it alive
-    ev_unref(*_loop);
-
-    // alright, the process has finished running
-    _callback();
-
-    // we may now stop monitoring for signals
-    return false;
+    // store the callback
+    _callback = callback;
 }
 
 /**
@@ -112,10 +113,26 @@ bool Process::onSignal()
  *
  *  @return the stdin file descriptor
  */
-int Process::stdin()
+Fd &Process::stdin()
 {
-    // return the master side of the stdin pipe
-    return _stdin[0];
+    // return the file descriptor to write to stdin
+    return _stdin.write();
+}
+
+/**
+ *  Register a handler for writability
+ *
+ *  Note that if you had already registered a handler before, then that one
+ *  will be reset. Only your new handler will be called when the filedescriptor
+ *  becomes writable
+ *
+ *  @param  callback    The callback to invoke when the process is ready to receive input
+ *  @return WriteWatcher
+ */
+std::shared_ptr<WriteWatcher> Process::onWritable(const WriteCallback &callback)
+{
+    // pass it on to the wrapper
+    return _stdin.onWritable(callback);
 }
 
 /**
@@ -128,10 +145,26 @@ int Process::stdin()
  *
  *  @return the stdout file descriptor
  */
-int Process::stdout()
+Fd &Process::stdout()
 {
-    // return the master side of the stdin pipe
-    return _stdout[0];
+    // return the file descriptor to read from stdout
+    return _stdout.read();
+}
+
+/**
+ *  Register a handler for readability
+ *
+ *  Note that if you had already registered a handler before, then that one
+ *  will be reset. Only your new handler will be called when the filedescriptor
+ *  becomes readable
+ *
+ *  @param  callback    The callback to invoke when the process has generated output
+ *  @return ReadWatcher
+ */
+std::shared_ptr<ReadWatcher> Process::onReadable(const ReadCallback &callback)
+{
+    // pass it on to the wrapper
+    return _stdout.onReadable(callback);
 }
 
 /**
@@ -144,10 +177,26 @@ int Process::stdout()
  *
  *  @return the stderr file descriptor
  */
-int Process::stderr()
+Fd &Process::stderr()
 {
-    // return the master side of the stdin pipe
-    return _stderr[0];
+    // return the file descriptor to read from stderr
+    return _stderr.read();
+}
+
+/**
+ *  Register a handler for errorability
+ *
+ *  Note that if you had already registered a handler before, then that one
+ *  will be reset. Only your new handler will be called when the filedescriptor
+ *  becomes readable
+ *
+ *  @param  callback    The callback to invoke when the process has generated errors
+ *  @return ReadWatcher
+ */
+std::shared_ptr<ReadWatcher> Process::onError(const ReadCallback &callback)
+{
+    // pass it on to the wrapper
+    return _stderr.onReadable(callback);
 }
 
 /**

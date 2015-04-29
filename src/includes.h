@@ -33,6 +33,8 @@
 #include "../include/watchers/cleanup.h"
 #include "../include/watchers/signal.h"
 #include "../include/watchers/status.h"
+#include "../include/fd.h"
+#include "../include/pipe.h"
 #include "../include/process.h"
 #include "../include/worker.h"
 #include "../include/net/ipv4.h"
