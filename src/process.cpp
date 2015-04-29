@@ -30,11 +30,27 @@ Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
     _stderr(_loop),
     _pid(fork()),
     _watcher(loop, _pid, true, [this](pid_t pid, int state) {
-        // execute the callback if it is set
-        if (_callback) _callback(state);
+        // if we are no longer running or the program was stopped or resumed we keep monitoring
+        bool result = _running && (WIFSTOPPED(state) || WIFCONTINUED(state));
 
-        // keep monitoring until the process has exited
-        return _running && !waitpid(pid, nullptr, WNOHANG);
+        // make a copy of the callback
+        auto callback = _callback;
+
+        // should we stop monitoring?
+        if (!result)
+        {
+            // indicate we are now stopped
+            _running = false;
+
+            // clear the callback
+            _callback = nullptr;
+        }
+
+        // execute the callback
+        if (callback) callback(state);
+
+        // let the loop know if we want to continue
+        return result;
     })
 {
     // did the fork succeed?
