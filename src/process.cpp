@@ -25,12 +25,17 @@ namespace React {
  */
 Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
     _loop(loop),
-    _stdin(_loop),
-    _stdout(_loop),
-    _stderr(_loop),
+    _stdin(_loop, O_CLOEXEC),
+    _stdout(_loop, O_CLOEXEC),
+    _stderr(_loop, O_CLOEXEC),
     _pid(fork()),
     _watcher(loop, _pid, true, [this](pid_t pid, int state) {
+        
+        // store result
+        _state = state;
+
         // if we are no longer running or the program was stopped or resumed we keep monitoring
+        // if result is true, then we want to continue monitoring
         bool result = _running && (WIFSTOPPED(state) || WIFCONTINUED(state));
 
         // make a copy of the callback
@@ -59,13 +64,14 @@ Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
         // oops, forking failed
         throw std::runtime_error(strerror(errno));
     }
-    // are we running in the main process
+    // are we running in the main process?
     else if (_pid)
     {
-        // declare our intentions with the pipes
-        _stdin.write();
-        _stdout.read();
-        _stderr.read();
+        // this is the main process, we are not interested in reading
+        // from stdin, or writing from the other two filedescriptors
+        _stdin.closeRead();
+        _stdout.closeWrite();
+        _stderr.closeWrite();
 
         // we now consider the process to be running
         _running = true;
@@ -74,12 +80,17 @@ Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
     else
     {
         // use the provided pipes for stdin, stdout and stderr
-        dup2(_stdin.read().fd(),   STDIN_FILENO);
-        dup2(_stdout.write().fd(), STDOUT_FILENO);
-        dup2(_stderr.write().fd(), STDERR_FILENO);
-
-        // execute the requested program
+        dup2(_stdin.readFd(),   STDIN_FILENO);
+        dup2(_stdout.writeFd(), STDOUT_FILENO);
+        dup2(_stderr.writeFd(), STDERR_FILENO);
+        
+        // execute the requested program (the pipe filedescriptors
+        // will automatically be closed because the close-on-exec
+        // bit is set for that filedescriptor
         execvp(program, const_cast<char **>(arguments));
+
+        // this is unreachable
+        _exit(127);
     }
 }
 
@@ -116,8 +127,25 @@ Process::~Process()
  */
 void Process::onStatusChange(const std::function<void(int status)> &callback)
 {
-    // store the callback
-    _callback = callback;
+    // if the process is already finished, we want to call the callback right away
+    if (_running)
+    {
+        // process is running, store the callback
+        _callback = callback;
+    }
+    else
+    {
+        // keep state
+        int state = _state;
+        
+        // process is not running, we want to call the callback right away,
+        // but use a small timeout to wait for the process to be ready
+        _loop->onTimeout(0.0, [state, callback]() {
+            
+            // call the callback
+            callback(state);
+        });
+    }
 }
 
 /**

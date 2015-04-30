@@ -10,6 +10,8 @@
 #include <arpa/inet.h>
 #include <ares.h>
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <memory>
 #include <map>
 #include <set>
@@ -35,6 +37,9 @@
 #include "../include/watchers/status.h"
 #include "../include/fd.h"
 #include "../include/pipe.h"
+#include "../include/readpipe.h"
+#include "../include/writepipe.h"
+#include "../include/fullpipe.h"
 #include "../include/process.h"
 #include "../include/worker.h"
 #include "../include/net/ipv4.h"

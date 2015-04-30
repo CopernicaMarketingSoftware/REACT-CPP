@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 /**
  *  C++ dependencies
@@ -50,6 +51,9 @@
 #include <reactcpp/watchers/status.h>
 #include <reactcpp/fd.h>
 #include <reactcpp/pipe.h>
+#include <reactcpp/readpipe.h>
+#include <reactcpp/writepipe.h>
+#include <reactcpp/fullpipe.h>
 #include <reactcpp/process.h>
 #include <reactcpp/net/ipv4.h>
 #include <reactcpp/net/ipv6.h>

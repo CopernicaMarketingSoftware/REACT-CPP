@@ -31,21 +31,21 @@ private:
 
     /**
      *  Pipe for writing to the process
-     *  @var    Pipe
+     *  @var    WritePipe
      */
-    Pipe _stdin;
+    WritePipe _stdin;
 
     /**
      *  Pipe for reading standard output from the process
-     *  @var    Pipe
+     *  @var    ReadPipe
      */
-    Pipe _stdout;
+    ReadPipe _stdout;
 
     /**
      *  Pipe for reading standard errors from the process
-     *  @var    Pipe
+     *  @var    ReadPipe
      */
-    Pipe _stderr;
+    ReadPipe _stderr;
 
     /**
      *  Process id of the running process
@@ -64,12 +64,19 @@ private:
      *  @var    bool
      */
     bool _running = false;
+    
+    /**
+     *  The state in which the process ended
+     *  @var    int
+     */
+    int _state = 0;
 
     /**
      *  Callback to invoke on status changes
      *  @var    std::function<void(int status)>
      */
     std::function<void(int status)> _callback;
+
 public:
     /**
      *  Constructor

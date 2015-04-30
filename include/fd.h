@@ -45,8 +45,20 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  loop
-     *  @param  fd
+     *  @param  loop        event loop
+     *  @param  fd          the file descriptor
+     *  @param  flags       extra flags to set on the filedescriptor
+     */
+    Fd(Loop *loop, int fd, int flags) : _loop(loop), _fd(fd) 
+    {
+        // add flags
+        fcntl(fd, F_SETFL, flags);
+    }
+
+    /**
+     *  Constructor
+     *  @param  loop        event loop
+     *  @param  fd          the file descriptor
      */
     Fd(Loop *loop, int fd) : _loop(loop), _fd(fd) {}
 

@@ -17,81 +17,87 @@ namespace React {
  */
 class Pipe
 {
-private:
+protected:
     /**
      *  The file descriptors used in the pipe
      *  @var    std::array<int, 2>
      */
     std::array<int, 2> _fds;
 
-    /**
-     *  File descriptor for reading
-     *  @var    Fd
-     */
-    Fd _read;
-
-    /**
-     *  File descriptor for writing
-     *  @var    Fd
-     */
-    Fd _write;
-
-    /**
-     *  Close the file descriptor at the given offset
-     *
-     *  @param  offset  The offset in the array to close
-     */
-    void close(size_t offset);
 public:
     /**
      *  Constructor
-     *
-     *  @param  loop    the loop to bind to
+     *  @param  flags       Optional flags (see man pipe2)
      */
-    Pipe(Loop *loop);
+    Pipe(int flags = 0)
+    {
+        // initialize the pipes
+        if (pipe2(_fds.data(), flags)) throw std::runtime_error(strerror(errno));
+    }
 
     /**
      *  Destructor
      */
-    virtual ~Pipe();
+    virtual ~Pipe()
+    {
+        // clean up the pipes
+        for (auto fd : _fds)
+        {
+            // check if it is a valid file descriptor and close it
+            // @todo we should check the return value
+            if (fd >= 0) close(fd);
+        }
+    }
 
     /**
-     *  Retrieve the file descriptor for reading
-     *
-     *  @return The file descriptor
+     *  Close the readable side of the pipe
+     *  @return bool    true on success, false on failure
      */
-    Fd &read();
+    bool closeRead()
+    {
+        // try to close the fd
+        if (_fds[0] >= 0 || close(_fds[0]) != 0) return false;
+        
+        // store invalid fd
+        _fds[0] = -1;
+        
+        // done
+        return true;
+    }
 
     /**
-     *  Retrieve the file descriptor for writing
-     *
-     *  @return The file descriptor
+     *  Close the writable side of the pipe
+     *  @return bool    true on success, false on failure
      */
-    Fd &write();
+    bool closeWrite()
+    {
+        // try to close the fd
+        if (_fds[1] >= 0 || close(_fds[1]) != 0) return false;
+        
+        // store invalid fd
+        _fds[1] = -1;
+        
+        // done
+        return true;
+    }
 
     /**
-     *  Register a handler for readability
-     *
-     *  Note that if you had already registered a handler before, then that one
-     *  will be reset. Only your new handler will be called when the filedescriptor
-     *  becomes readable
-     *
-     *  @param  callback    The callback to invoke when data is available to be read
-     *  @return Watcher object to cancel reading
+     *  The filedescriptor for reading
+     *  @return int
      */
-    std::shared_ptr<ReadWatcher> onReadable(const ReadCallback &callback);
-
+    int readFd() const
+    {
+        return _fds[0];
+    }
+    
     /**
-     *  Register a handler for writability
-     *
-     *  Note that if you had already registered a handler before, then that one
-     *  will be reset. Only your new handler will be called when the filedescriptor
-     *  becomes writable
-     *
-     *  @param  callback    The callback to invoke when data can be sent
-     *  @return Watcher object to cancel writing
+     *  The filedescriptor for writing
+     *  @return int
      */
-    std::shared_ptr<WriteWatcher> onWritable(const WriteCallback &callback);
+    int writeFd() const
+    {
+        return _fds[1];
+    }
 };
 
 /**
