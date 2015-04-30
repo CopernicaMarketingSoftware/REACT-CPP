@@ -35,14 +35,13 @@ Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
         _state = state;
 
         // if we are no longer running or the program was stopped or resumed we keep monitoring
-        // if result is true, then we want to continue monitoring
-        bool result = _running && (WIFSTOPPED(state) || WIFCONTINUED(state));
+        bool stillrunning = _running && (WIFSTOPPED(state) || WIFCONTINUED(state));
 
         // make a copy of the callback
         auto callback = _callback;
 
         // should we stop monitoring?
-        if (!result)
+        if (!stillrunning)
         {
             // indicate we are now stopped
             _running = false;
@@ -55,7 +54,7 @@ Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
         if (callback) callback(state);
 
         // let the loop know if we want to continue
-        return result;
+        return stillrunning;
     })
 {
     // did the fork succeed?
@@ -106,10 +105,23 @@ Process::~Process()
     _running = false;
 
     // send a term signal to the child
-    kill(_pid, SIGTERM);
+    kill(_pid, SIGKILL);
 
-    // wait for the child to exit gracefully
-    waitpid(_pid, nullptr, 0);
+    // keep waiting until the child is dead
+    while (true)
+    {
+        // wait for the child to exit gracefully
+        pid_t pid = waitpid(_pid, &_state, 0);
+        
+        // was the process dead?
+        if (pid == _pid && (WIFEXITED(_state) || WIFSIGNALED(_state))) break;
+        
+        // when an error occured, it also means that the child is dead
+        if (pid < 0 && errno == ECHILD) break;
+    }
+    
+    // the child is dead, invoke the callback
+    if (_callback) _callback(_state);
 }
 
 /**
