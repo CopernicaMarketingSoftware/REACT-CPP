@@ -93,6 +93,16 @@ public:
     virtual ~Process();
 
     /**
+     *  The process ID
+     *  @return pid_t
+     */
+    pid_t pid() const
+    {
+        // return the member
+        return _pid;
+    }
+
+    /**
      *  Register a handler for status changes
      *
      *  Note that if you had already registered a handler before, then that one
