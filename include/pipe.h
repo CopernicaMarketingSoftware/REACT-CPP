@@ -56,11 +56,11 @@ public:
     bool closeRead()
     {
         // try to close the fd
-        if (_fds[0] >= 0 || close(_fds[0]) != 0) return false;
-        
+        if (_fds[0] <= 0 || close(_fds[0]) != 0) return false;
+
         // store invalid fd
         _fds[0] = -1;
-        
+
         // done
         return true;
     }
@@ -72,11 +72,11 @@ public:
     bool closeWrite()
     {
         // try to close the fd
-        if (_fds[1] >= 0 || close(_fds[1]) != 0) return false;
-        
+        if (_fds[1] <= 0 || close(_fds[1]) != 0) return false;
+
         // store invalid fd
         _fds[1] = -1;
-        
+
         // done
         return true;
     }
@@ -89,7 +89,7 @@ public:
     {
         return _fds[0];
     }
-    
+
     /**
      *  The filedescriptor for writing
      *  @return int

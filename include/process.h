@@ -129,6 +129,17 @@ public:
     Fd &stdin();
 
     /**
+     *  Close the stdin to the process
+     *
+     *  This way the process knows to expect no more data
+     *  coming in. Without it, the process may block waiting
+     *  for data to arrive.
+     *
+     *  @return was the connection successfully closed
+     */
+    bool closeStdin();
+
+    /**
      *  Register a handler for writability
      *
      *  Note that if you had already registered a handler before, then that one
