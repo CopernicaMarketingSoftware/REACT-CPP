@@ -96,6 +96,23 @@ public:
     IntervalWatcher(Loop *loop, Timestamp interval, const CALLBACK &callback) : IntervalWatcher(loop, interval, interval, callback) {}
 
     /**
+     *  Constructor
+     *
+     *  This constructor is used to create an interval that is not
+     *  initially started. After construction, the set() member
+     *  function can be used to set a timeout and start
+     */
+    IntervalWatcher(Loop *loop, const IntervalCallback &callback) :
+        _loop(loop), _callback(callback)
+    {
+        // store pointer to current object
+        _watcher.data = this;
+
+        // initialize the watcher
+        initialize(0.0, 0.0);
+    }
+
+    /**
      *  No copying or moving allowed
      *  @param  that
      */

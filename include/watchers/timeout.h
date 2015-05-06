@@ -64,8 +64,8 @@ protected:
         {
             // timer is no longer active
             cancel();
-            
-            // notify parent (return value is not important, a timer is always 
+
+            // notify parent (return value is not important, a timer is always
             // cancelled after it expired)
             _callback();
         }
@@ -97,6 +97,23 @@ public:
     }
 
     /**
+     *  Constructor
+     *
+     *  This constructor is used to create a timeout that is not
+     *  initially started. After construction, the set() member
+     *  function can be used to set a timeout and start
+     */
+    TimeoutWatcher(Loop *loop, const TimeoutCallback &callback) :
+        _loop(loop), _callback(callback)
+    {
+        // store pointer to current object
+        _watcher.data = this;
+
+        // initialize the watcher
+        initialize(0.0);
+    }
+
+    /**
      *  No copying or moving allowed
      *  @param  that
      */
@@ -106,7 +123,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~TimeoutWatcher() 
+    virtual ~TimeoutWatcher()
     {
         // cancel the timer
         cancel();
@@ -118,7 +135,7 @@ public:
      */
     TimeoutWatcher &operator=(const TimeoutWatcher &that) = delete;
     TimeoutWatcher &operator=(TimeoutWatcher &&that) = delete;
-    
+
     /**
      *  Start the timer
      *  @return bool
@@ -127,14 +144,14 @@ public:
     {
         // skip if already running
         if (_active) return false;
-        
+
         // start now
         ev_timer_start(*_loop, &_watcher);
-        
+
         // remember that it is active
         return _active = true;
     }
-    
+
     /**
      *  Cancel the timer
      *  @return bool
@@ -143,13 +160,13 @@ public:
     {
         // skip if not running
         if (!_active) return false;
-        
+
         // stop now
         ev_timer_stop(*_loop, &_watcher);
-        
+
         // remember that it no longer is active
         _active = false;
-        
+
         // done
         return true;
     }
@@ -169,7 +186,7 @@ public:
         {
             // set the new expire time
             _expire = _loop->now() + timeout;
-            
+
             // done
             return true;
         }
@@ -177,19 +194,19 @@ public:
         {
             // cancel the current time
             cancel();
-            
+
             // set a new timer
             ev_timer_set(&_watcher, timeout, 0.0);
-            
+
             // remember expire time
             _expire = _loop->now() + timeout;
-            
+
             // start the timer
             return start();
         }
     }
-}; 
- 
+};
+
 /**
  *  End namespace
  */
