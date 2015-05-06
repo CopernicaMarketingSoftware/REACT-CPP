@@ -111,7 +111,7 @@ public:
      *
      *  @return Timestamp;
      */
-    Timestamp now()
+    Timestamp now() const
     {
         return ev_now(_loop);
     }
