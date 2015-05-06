@@ -30,7 +30,7 @@ Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
     _stderr(_loop, O_CLOEXEC),
     _pid(fork()),
     _watcher(loop, _pid, true, [this](pid_t pid, int state) {
-        
+
         // store result
         _state = state;
 
@@ -82,7 +82,7 @@ Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
         dup2(_stdin.readFd(),   STDIN_FILENO);
         dup2(_stdout.writeFd(), STDOUT_FILENO);
         dup2(_stderr.writeFd(), STDERR_FILENO);
-        
+
         // execute the requested program (the pipe filedescriptors
         // will automatically be closed because the close-on-exec
         // bit is set for that filedescriptor
@@ -105,23 +105,34 @@ Process::~Process()
     _running = false;
 
     // send a term signal to the child
-    kill(_pid, SIGKILL);
+    ::kill(_pid, SIGKILL);
 
     // keep waiting until the child is dead
     while (true)
     {
         // wait for the child to exit gracefully
         pid_t pid = waitpid(_pid, &_state, 0);
-        
+
         // was the process dead?
         if (pid == _pid && (WIFEXITED(_state) || WIFSIGNALED(_state))) break;
-        
+
         // when an error occured, it also means that the child is dead
         if (pid < 0 && errno == ECHILD) break;
     }
-    
+
     // the child is dead, invoke the callback
     if (_callback) _callback(_state);
+}
+
+/**
+ *  Send a signal to the child process
+ *
+ *  @param  signal  the signal to send (see 'man 2 kill')
+ */
+bool Process::kill(int signal)
+{
+    // kill returns 0 on success
+    return ::kill(_pid, signal) == 0;
 }
 
 /**
@@ -149,11 +160,11 @@ void Process::onStatusChange(const std::function<void(int status)> &callback)
     {
         // keep state
         int state = _state;
-        
+
         // process is not running, we want to call the callback right away,
         // but use a small timeout to wait for the process to be ready
         _loop->onTimeout(0.0, [state, callback]() {
-            
+
             // call the callback
             callback(state);
         });

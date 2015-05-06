@@ -64,7 +64,7 @@ private:
      *  @var    bool
      */
     bool _running = false;
-    
+
     /**
      *  The state in which the process ended
      *  @var    int
@@ -91,6 +91,14 @@ public:
      *  Destructor
      */
     virtual ~Process();
+
+    /**
+     *  Send a signal to the child process
+     *
+     *  @param  signal  the signal to send (see 'man 2 kill')
+     *  @return Did we successfully send the signal
+     */
+    bool kill(int signal);
 
     /**
      *  The process ID
