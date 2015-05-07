@@ -85,7 +85,18 @@ public:
      *  @param  program     The program to execute
      *  @param  arguments   Null-terminated array of arguments
      */
-    Process(MainLoop *loop, const char *program, const char *arguments[]);
+    Process(MainLoop *loop, const char *program, const char * const *arguments);
+
+    /**
+     *  Constructor
+     *
+     *  @param  loop        The loop that is responsible for the process
+     *  @param  program     The program to execute
+     *  @param  arg1,...    Zero or more arguments for the process
+     */
+    template <typename... Arguments>
+    Process(MainLoop *loop, const char *program, Arguments... parameters) :
+        Process(loop, program, static_cast<const char * const *>(std::array<const char*, sizeof...(Arguments) + 1>{ parameters..., nullptr }.data())) {}
 
     /**
      *  Destructor

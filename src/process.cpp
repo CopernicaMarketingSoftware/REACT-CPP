@@ -23,7 +23,7 @@ namespace React {
  *  @param  program     The program to execute
  *  @param  arguments   Null-terminated array of arguments
  */
-Process::Process(MainLoop *loop, const char *program, const char *arguments[]) :
+Process::Process(MainLoop *loop, const char *program, const char * const *arguments) :
     _loop(loop),
     _stdin(_loop, O_CLOEXEC),
     _stdout(_loop, O_CLOEXEC),
