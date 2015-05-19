@@ -1,16 +1,22 @@
 CPP		        = g++
 RM		        = rm -f
-CPPFLAGS	    = -Wall -MMD -c -I. -O2 -flto -std=c++11 -g
+CPPFLAGS	    = -Wall -MMD -c -I. -flto -std=c++11
 LD		        = g++
-LD_FLAGS	    = -Wall -shared -O2
-SHARED_LIB	    = libreactcpp.so
-STATIC_LIB	    = $(SHARED_LIB:%.so=%.a)
+LD_FLAGS		= -Wall -shared
+SHARED_LIB		= lib$(LIBRARY_NAME).so.$(VERSION)
+STATIC_LIB		= lib$(LIBRARY_NAME).a.$(VERSION)
 SOURCES		    = $(wildcard *.cpp */*.cpp)
 DEPENDENCIES    = $(SOURCES:%.cpp=%.d)
 SHARED_OBJECTS	= $(SOURCES:%.cpp=%.o)
 STATIC_OBJECTS	= $(SOURCES:%.cpp=%.s.o)
 
+all:	CPPFLAGS += -g
+all:	LD_FLAGS += -g
 all:	shared static
+
+release:	CPPFLAGS += -O2
+release:	LD_FLAGS += -O2
+release:	shared static
 
 -include ${DEPENDENCIES}
 
@@ -19,7 +25,7 @@ shared:	${SHARED_OBJECTS} ${SHARED_LIB}
 static:	${STATIC_OBJECTS} ${STATIC_LIB}
 
 ${SHARED_LIB}: ${SHARED_OBJECTS}
-	${LD} ${LD_FLAGS} -o $@ ${SHARED_OBJECTS} -lev -lcares
+	${LD} ${LD_FLAGS} -Wl,-soname,lib$(LIBRARY_NAME).so.$(SONAME) -o $@ ${SHARED_OBJECTS} -lev -lcares
 
 ${STATIC_LIB}: ${STATIC_OBJECTS}
 	ar rcs ${STATIC_LIB} ${STATIC_OBJECTS}
