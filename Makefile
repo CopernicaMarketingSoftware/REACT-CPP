@@ -3,7 +3,7 @@ INCLUDE_DIR             = ${PREFIX}/include
 LIBRARY_DIR             = ${PREFIX}/lib
 export LIBRARY_NAME		= reactcpp
 export SONAME			= 1.0
-export VERSION			= 1.0.0
+export VERSION			= 1.0.1
 
 all:
 		$(MAKE) -C src all
