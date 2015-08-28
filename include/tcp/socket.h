@@ -153,12 +153,13 @@ public:
     }
 
     /**
-     *  Constructor to directly bind the socket to a unix domain path
+     *  Constructor to create a unix domain socket server or client
      *
      *  Watch out! The constructor will throw an exception in case of an error.
      *
      *  @param  loop        Event loop
-     *  @param  path        The path to listen on
+     *  @param  path        The path to listen on when acting as server
+     *                      (or) nullptr when acting as client
      */
     Socket(Loop *loop, const char *path) :
         Fd(loop, socket(AF_UNIX, SOCK_STREAM, 0))
@@ -166,8 +167,8 @@ public:
         // this should succeed
         if (_fd < 0) throw Exception(strerror(errno));
 
-        // we are going to bind the socket
-        if (!bind(path)) throw Exception(strerror(errno));
+        // we are going to bind the socket only when path is provided
+        if (path != nullptr && !bind(path)) throw Exception(strerror(errno));
 
         // no keepalive configuration here, this does not
         // really apply to unix domain sockets in any case
@@ -276,6 +277,25 @@ public:
     bool connect(const Net::Address &address) const
     {
         return connect(address.ip(), address.port());
+    }
+
+    /**
+     * Connect the socket to a unix domain socket server
+     * @param  path
+     * @return bool
+     */
+    bool connect(const char *path) const
+    {
+        // structure to initialize
+        struct sockaddr_un info;
+
+        // fill the members
+        info.sun_family = AF_UNIX;
+        strcpy(info.sun_path, path);
+        size_t len = sizeof(info.sun_family) + strlen(path);
+
+        // connect
+        return ::connect(_fd, (struct sockaddr *)&info, len) == 0 || errno == EINPROGRESS;
     }
 
     /**

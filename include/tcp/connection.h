@@ -85,33 +85,11 @@ private:
         _connectedCallback = nullptr;
     }
 
-public:
     /**
-     *  Constructor
-     *  @param  server      Tcp::Server object that is in readable state, and for which we'll accept the connection
+     * Assign the cached callbacks directly to the socket object
      */
-    Connection(const Server *server) : _socket(std::move(server->_socket.accept())), _status(connected) {}
-
-    /**
-     *  Constructor
-     *  @param  server      Tcp::Server object that is in readable state, and for which we'll accept the connection
-     */
-    Connection(const Server &server) : Connection(&server) {}
-
-    /**
-     *  Constructor to connect to a socket
-     *  @param  loop        Event loop
-     *  @param  fromip      IP address to connect from
-     *  @param  fromport    Port number to connect from
-     *  @param  toip        IP address to connect to
-     *  @param  toport      Port number to connect to
-     */
-    Connection(Loop *loop, const Net::Ip &fromip, uint16_t fromport, const Net::Ip &toip, uint16_t toport) :
-        _socket(loop, fromip, fromport), _status(connecting)
+    void setup()
     {
-        // try connecting
-        if (!_socket.connect(toip, toport)) throw Exception(strerror(errno));
-
         // wait until writable
         _socket.onWritable([this]() {
 
@@ -145,6 +123,37 @@ public:
             // no other writability events please
             return false;
         });
+    }
+
+public:
+    /**
+     *  Constructor
+     *  @param  server      Tcp::Server object that is in readable state, and for which we'll accept the connection
+     */
+    Connection(const Server *server) : _socket(std::move(server->_socket.accept())), _status(connected) {}
+
+    /**
+     *  Constructor
+     *  @param  server      Tcp::Server object that is in readable state, and for which we'll accept the connection
+     */
+    Connection(const Server &server) : Connection(&server) {}
+
+    /**
+     *  Constructor to connect to a socket
+     *  @param  loop        Event loop
+     *  @param  fromip      IP address to connect from
+     *  @param  fromport    Port number to connect from
+     *  @param  toip        IP address to connect to
+     *  @param  toport      Port number to connect to
+     */
+    Connection(Loop *loop, const Net::Ip &fromip, uint16_t fromport, const Net::Ip &toip, uint16_t toport) :
+        _socket(loop, fromip, fromport), _status(connecting)
+    {
+        // try connecting
+        if (!_socket.connect(toip, toport)) throw Exception(strerror(errno));
+
+        // assign callbacks
+        setup();
     }
 
     /**
@@ -183,6 +192,21 @@ public:
      */
     Connection(Loop *loop, const Net::Address &to) :
         Connection(loop, to.ip().version() == 6 ? Net::Ip(Net::Ipv6()) : Net::Ip(Net::Ipv4()), 0, to.ip(), to.port()) {}
+
+    /**
+     * Constructor to connect to a unix domain socket
+     * @param   loop        Event loop
+     * @param   to          path to unix domain socket server
+     */
+    Connection(Loop *loop, const char *topath) :
+        _socket(loop, nullptr)
+    {
+        // try connecting
+        if (!_socket.connect(topath)) throw Exception(strerror(errno));
+
+        // assign callbacks
+        setup();
+    }
 
     /**
      *  Connection can not be copied
