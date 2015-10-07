@@ -18,12 +18,6 @@ class ThreadWorkerImpl : public WorkerImpl
 {
 private:
     /**
-     *  The thread we run
-     *  @var    std::thread
-     */
-    std::thread _thread;
-
-    /**
      *  Are we still running?
      *  @var    bool
      */
@@ -46,6 +40,14 @@ private:
      *  @var    std::condition_variable
      */
     std::condition_variable _condition;
+
+    /**
+     *  The thread we run (must be last member because it relies on other 
+     *  members in the class, and we dont want to run the thread before
+     *  the other members are initialized)
+     *  @var    std::thread
+     */
+    std::thread _thread;
 
     /**
      *  Callback function that is executed from the loop context
