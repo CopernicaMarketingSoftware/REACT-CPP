@@ -42,6 +42,9 @@ protected:
             // check family
             if (u.s.sa_family == AF_INET6) return Net::Address(Net::Ip(u.v6.sin6_addr), ntohs(u.v6.sin6_port));
             if (u.s.sa_family == AF_INET) return Net::Address(Net::Ip(u.v4.sin_addr), ntohs(u.v4.sin_port));
+
+            // basically a hack because Net::Address doesn't support unix domain address
+            if (u.s.sa_family == AF_LOCAL) return Net::Address(Net::Ip("127.0.0.1"), 0);
         }
     
         // default invalid address

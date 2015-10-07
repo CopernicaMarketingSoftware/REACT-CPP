@@ -59,6 +59,19 @@ public:
         Server(loop, Net::Ip(), port) {}
 
     /**
+     *  Constructor to listen on a unix domain socket
+     *
+     *  @param  loop        Event loop
+     *  @param  path        Path for the socket
+     */
+    Server(Loop *loop, const char *path) :
+        _socket(loop, path)
+    {
+        // listen to the socket
+        if (!_socket.listen()) throw Exception(strerror(errno));
+    }
+
+    /**
      *  Constructor to listen to a random port
      *  @param  loop        Event loop
      */
