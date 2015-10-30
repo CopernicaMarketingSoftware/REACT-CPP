@@ -17,6 +17,9 @@ static:
 shared:
 		$(MAKE) -C src shared
 
+static_fpic:
+		$(MAKE) -C src static_fpic
+
 clean:
 		$(MAKE) -C src clean
 
@@ -33,8 +36,9 @@ install:
 		cp -f include/net/*.h ${INCLUDE_DIR}/$(LIBRARY_NAME)/net
 		cp -f include/tcp/*.h ${INCLUDE_DIR}/$(LIBRARY_NAME)/tcp
 		cp -f include/watchers/*.h ${INCLUDE_DIR}/$(LIBRARY_NAME)/watchers
-		cp -f src/lib$(LIBRARY_NAME).so.$(VERSION) ${LIBRARY_DIR}
-		cp -f src/lib$(LIBRARY_NAME).a.$(VERSION) ${LIBRARY_DIR}
+		-cp -f src/lib$(LIBRARY_NAME).so.$(VERSION) ${LIBRARY_DIR}
+		-cp -f src/lib$(LIBRARY_NAME).a.$(VERSION) ${LIBRARY_DIR}
+		-cp -f src/lib$(LIBRARY_NAME)_fpic.a ${LIBRARY_DIR}
 		ln -s -f lib$(LIBRARY_NAME).so.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so.$(SONAME)
 		ln -s -f lib$(LIBRARY_NAME).so.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so
 		ln -s -f lib$(LIBRARY_NAME).a.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).a

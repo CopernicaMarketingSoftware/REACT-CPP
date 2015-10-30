@@ -1,11 +1,12 @@
-CPP		        = g++
-RM		        = rm -f
-CPPFLAGS	    = -Wall -MMD -c -I. -flto -std=c++11
-LD		        = g++
-LD_FLAGS		= -Wall -shared
-SHARED_LIB		= lib$(LIBRARY_NAME).so.$(VERSION)
-STATIC_LIB		= lib$(LIBRARY_NAME).a.$(VERSION)
-SOURCES		    = $(wildcard *.cpp */*.cpp)
+CPP		= g++
+RM		= rm -f
+CPPFLAGS	= -Wall -MMD -c -I. -std=c++11
+LD		= g++
+LD_FLAGS	= -Wall -shared
+SHARED_LIB	= lib$(LIBRARY_NAME).so.$(VERSION)
+STATIC_LIB	= lib$(LIBRARY_NAME).a.$(VERSION)
+STATIC_FPIC_LIB = lib$(LIBRARY_NAME)_fpic.a
+SOURCES		= $(wildcard *.cpp */*.cpp)
 DEPENDENCIES    = $(SOURCES:%.cpp=%.d)
 SHARED_OBJECTS	= $(SOURCES:%.cpp=%.o)
 STATIC_OBJECTS	= $(SOURCES:%.cpp=%.s.o)
@@ -22,6 +23,8 @@ release:	shared static
 
 shared:	${SHARED_OBJECTS} ${SHARED_LIB}
 
+static_fpic: ${SHARED_OBJECTS} ${STATIC_FPIC_LIB}
+
 static:	${STATIC_OBJECTS} ${STATIC_LIB}
 
 ${SHARED_LIB}: ${SHARED_OBJECTS}
@@ -29,6 +32,9 @@ ${SHARED_LIB}: ${SHARED_OBJECTS}
 
 ${STATIC_LIB}: ${STATIC_OBJECTS}
 	ar rcs ${STATIC_LIB} ${STATIC_OBJECTS}
+
+${STATIC_FPIC_LIB}: ${SHARED_OBJECTS}
+	ar rcs ${STATIC_FPIC_LIB} ${SHARED_OBJECTS}
 
 clean:
 	${RM} *.obj *~* ${SHARED_OBJECTS} ${STATIC_OBJECTS} ${SHARED_LIB} ${STATIC_LIB}
